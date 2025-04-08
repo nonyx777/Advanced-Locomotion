@@ -1,8 +1,26 @@
-[gd_scene load_steps=2 format=3 uid="uid://g25ws7lotasa"]
+[gd_scene load_steps=5 format=3 uid="uid://g25ws7lotasa"]
+
+[ext_resource type="Script" path="res://Script/character.gd" id="1_4lu42"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qtrob"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_s0t61"]
 
-[node name="Character" type="Node3D"]
+[sub_resource type="BoxMesh" id="BoxMesh_qh0ih"]
+size = Vector3(0.5, 0.2, 0.5)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+[node name="Character" type="Node3D"]
+script = ExtResource("1_4lu42")
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+shape = SubResource("CapsuleShape3D_qtrob")
+
+[node name="Body" type="MeshInstance3D" parent="CharacterBody3D/CollisionShape3D"]
 mesh = SubResource("CapsuleMesh_s0t61")
+skeleton = NodePath("../../..")
+
+[node name="Head" type="MeshInstance3D" parent="CharacterBody3D/CollisionShape3D/Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.470989, 0.40877)
+mesh = SubResource("BoxMesh_qh0ih")
