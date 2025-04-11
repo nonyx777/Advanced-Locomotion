@@ -1,5 +1,6 @@
 extends Node3D
 @onready var characterBody: CharacterBody3D = $CharacterBody3D
+@onready var camera: Camera3D = $"../Camera3D"
 
 # TODO:
 	# Move
@@ -14,11 +15,15 @@ extends Node3D
 # Both inputs and directions in WASD order
 var inputs: NDArray = nd.zeros([4, 1])
 var directions: NDArray = nd.array([[0, 0, 1], [-1, 0, 0], [0, 0, -1], [1, 0, 0]], nd.Float32)
+var key_direction: Vector3
+var target_angle: float
 
 # Linear Movement
-@export var force: float = 500.0
-var acceleration: NDArray = nd.zeros(3, nd.Float32)
-var velocity: NDArray = nd.zeros(3, nd.Float32)
+@export var force: float = 20
+var acceleration: Vector3
+var velocity: Vector3
+var force_vec: Vector3
+var drag: float = 0.9
 
 
 func process_input() -> void:
@@ -39,18 +44,28 @@ func process_input() -> void:
 	else:
 		inputs.set(0.0, 3, 0)
 
-func process_movement(delta: float) -> void:
-	acceleration.assign_multiply(acceleration, 0.0)
-	acceleration = nd.multiply(nd.sum(nd.multiply(directions, nd.multiply(inputs, force)), 0), delta)
-	velocity.assign_add(velocity, nd.multiply(acceleration, delta))
-	velocity.assign_multiply(velocity, 0.95)
-	
+func movementOrientation() -> void:
+	key_direction = nd.sum(nd.multiply(directions, inputs), 0).to_vector3()
+	if key_direction.length() < 0.1:
+		force_vec *= 0.0
+		return
+	var camera_yaw: float = camera.transform.basis.get_euler().y
+	target_angle = atan2(key_direction.x, -key_direction.z) + camera_yaw
+	characterBody.transform.basis = Basis(characterBody.transform.basis.y, target_angle)
+	force_vec = Vector3(sin(target_angle), 0.0, cos(target_angle))
+
+func movement(delta: float) -> void:
+	acceleration *= 0.0
+	acceleration = force_vec * force
+	velocity += acceleration * delta
+	velocity *= drag
 
 func _ready() -> void:
 	pass
 
 func _process(delta: float) -> void:
 	process_input()
-	process_movement(delta)
-	characterBody.velocity = velocity.to_vector3()
+	movementOrientation()
+	movement(delta)
+	characterBody.velocity = velocity
 	characterBody.move_and_slide()
