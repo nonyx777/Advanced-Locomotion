@@ -16,7 +16,6 @@ extends Node3D
 var inputs: NDArray = nd.zeros([4, 1])
 var directions: NDArray = nd.array([[0, 0, 1], [-1, 0, 0], [0, 0, -1], [1, 0, 0]], nd.Float32)
 var key_direction: Vector3
-var target_angle: float
 
 # Linear Movement
 @export var force: float = 20
@@ -24,7 +23,10 @@ var acceleration: Vector3
 var velocity: Vector3
 var force_vec: Vector3
 var drag: float = 0.9
-
+var snappiness: float = 3.0
+var target_angle: float
+var desired_rotation: Basis
+var temporary_transform: Transform3D
 
 func process_input() -> void:
 	if Input.is_action_pressed("Forward"):
@@ -44,14 +46,18 @@ func process_input() -> void:
 	else:
 		inputs.set(0.0, 3, 0)
 
-func movementOrientation() -> void:
+func movementOrientation(delta: float) -> void:
 	key_direction = nd.sum(nd.multiply(directions, inputs), 0).to_vector3()
 	if key_direction.length() < 0.1:
 		force_vec *= 0.0
 		return
 	var camera_yaw: float = camera.transform.basis.get_euler().y
 	target_angle = atan2(key_direction.x, -key_direction.z) + camera_yaw
-	characterBody.transform.basis = Basis(characterBody.transform.basis.y, target_angle)
+	# Smoothly rotate to target rotation
+	desired_rotation = Basis(characterBody.transform.basis.y, target_angle)
+	temporary_transform = characterBody.transform
+	temporary_transform.basis = temporary_transform.basis.slerp(desired_rotation, snappiness * delta)
+	characterBody.transform = temporary_transform
 	force_vec = Vector3(sin(target_angle), 0.0, cos(target_angle))
 
 func movement(delta: float) -> void:
@@ -65,7 +71,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	process_input()
-	movementOrientation()
+	movementOrientation(delta)
 	movement(delta)
 	characterBody.velocity = velocity
 	characterBody.move_and_slide()
