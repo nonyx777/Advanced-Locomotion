@@ -31,6 +31,10 @@ var desired_rotation2: Quaternion
 var direction_rotation: Quaternion
 var tilt_rotation: Quaternion
 
+# Animation Parameters
+@export var animationTree: AnimationTree
+var blend_position: float
+
 func process_input() -> void:
 	if Input.is_action_pressed("Forward"):
 		inputs.set(1.0, 0, 0)
@@ -50,7 +54,8 @@ func process_input() -> void:
 		inputs.set(0.0, 3, 0)
 
 func movementOrientation(delta: float) -> void:
-	key_direction = nd.sum(nd.multiply(directions, inputs), 0).to_vector3()
+	key_direction = nd.sum(nd.multiply(directions, inputs), 0).to_vector3().normalized()
+	blend_position = velocity.length()
 	if key_direction.length() < 0.1:
 		force_vec *= 0.0
 		return
@@ -73,19 +78,20 @@ func tilt(delta: float) -> void:
 	var norm_acc: Vector3 = acceleration.normalized()
 	var rotation_axis: Vector3 = norm_local_y.cross(norm_acc)
 	if rotation_axis == Vector3.ZERO:
-		var t = Quaternion().from_euler(Vector3(0.0, desired_rotation1.get_euler().y, 0.0))
+		var t = Quaternion.from_euler(Vector3(0.0, desired_rotation1.get_euler().y, 0.0))
 		characterBody.transform.basis = Basis(characterBody.transform.basis.get_rotation_quaternion().slerp(t, snappiness * delta))
 		return
 	
 	characterBody.transform.basis = characterBody.transform.basis.slerp(characterBody.transform.basis.rotated(rotation_axis.normalized(), deg_to_rad(10.0)), snappiness * delta)
 
 func _ready() -> void:
-	pass
+	animationTree.active = true
 
 func _process(delta: float) -> void:
 	process_input()
 	movementOrientation(delta)
 	movement(delta)
-	tilt(delta)
+	#tilt(delta)
 	characterBody.velocity = velocity
 	characterBody.move_and_slide()
+	animationTree.set("parameters/blend_position", blend_position)

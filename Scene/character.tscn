@@ -1,6 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://g25ws7lotasa"]
+[gd_scene load_steps=15 format=3 uid="uid://g25ws7lotasa"]
 
-[ext_resource type="Script" path="res://Script/character.gd" id="1_4lu42"]
+[ext_resource type="Script" uid="uid://ba4ff8gpkyn01" path="res://Script/character.gd" id="1_4lu42"]
+[ext_resource type="PackedScene" uid="uid://bsqefmw0yvjen" path="res://Animations/Tpose/Tpose.fbx" id="2_c5wc2"]
+[ext_resource type="AnimationLibrary" uid="uid://ji4f2wg7c7eh" path="res://Animations/Idle/Idle.res" id="3_ohaor"]
+[ext_resource type="AnimationLibrary" uid="uid://bngrmtjn1t7v6" path="res://Animations/Walk/Walking.res" id="5_vj8le"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_cpq5r"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -16,14 +19,33 @@ tonemap_mode = 2
 glow_enabled = true
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qtrob"]
+radius = 0.367349
+height = 1.76712
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_s0t61"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_qh0ih"]
 size = Vector3(0.5, 0.2, 0.5)
 
-[node name="Character" type="Node3D"]
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_46cb6"]
+animation = &"Idle/mixamo_com"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ep1am"]
+animation = &"Walking/Walking"
+
+[sub_resource type="AnimationNodeBlendSpace1D" id="AnimationNodeBlendSpace1D_2ht62"]
+blend_point_0/node = SubResource("AnimationNodeAnimation_46cb6")
+blend_point_0/pos = 0.0
+blend_point_1/node = SubResource("AnimationNodeAnimation_ep1am")
+blend_point_1/pos = 1.0
+
+[sub_resource type="QuadMesh" id="QuadMesh_c5erk"]
+size = Vector2(10, 10)
+
+[node name="Character" type="Node3D" node_paths=PackedStringArray("animationTree")]
 script = ExtResource("1_4lu42")
+force = 11.0
+animationTree = NodePath("CharacterBody3D/Tpose/AnimationTree")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
@@ -35,12 +57,32 @@ environment = SubResource("Environment_gt81d")
 [node name="CharacterBody3D" type="CharacterBody3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.89, 0)
 shape = SubResource("CapsuleShape3D_qtrob")
 
 [node name="Body" type="MeshInstance3D" parent="CharacterBody3D/CollisionShape3D"]
+visible = false
 mesh = SubResource("CapsuleMesh_s0t61")
 skeleton = NodePath("../../..")
 
 [node name="Head" type="MeshInstance3D" parent="CharacterBody3D/CollisionShape3D/Body"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.470989, 0.40877)
 mesh = SubResource("BoxMesh_qh0ih")
+
+[node name="Tpose" parent="CharacterBody3D" instance=ExtResource("2_c5wc2")]
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="CharacterBody3D/Tpose"]
+libraries = {
+&"Idle": ExtResource("3_ohaor"),
+&"Walking": ExtResource("5_vj8le")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="CharacterBody3D/Tpose"]
+active = false
+tree_root = SubResource("AnimationNodeBlendSpace1D_2ht62")
+anim_player = NodePath("../AnimationPlayer2")
+parameters/blend_position = 0.00153613
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("QuadMesh_c5erk")
