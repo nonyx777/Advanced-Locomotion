@@ -34,6 +34,7 @@ var tilt_rotation: Quaternion
 # Animation Parameters
 @export var animationTree: AnimationTree
 var blend_position: float
+var last_velocity: Vector3
 
 func process_input() -> void:
 	if Input.is_action_pressed("Forward"):
@@ -84,14 +85,20 @@ func tilt(delta: float) -> void:
 	
 	characterBody.transform.basis = characterBody.transform.basis.slerp(characterBody.transform.basis.rotated(rotation_axis.normalized(), deg_to_rad(10.0)), snappiness * delta)
 
+func animation() -> void:
+	if last_velocity.normalized().dot(force_vec.normalized()) <= -0.8:
+		print("Turn 180")
+	animationTree.set("parameters/blend_position", blend_position)
+
 func _ready() -> void:
 	animationTree.active = true
 
 func _process(delta: float) -> void:
+	last_velocity = velocity
 	process_input()
 	movementOrientation(delta)
 	movement(delta)
 	#tilt(delta)
+	animation()
 	characterBody.velocity = velocity
 	characterBody.move_and_slide()
-	animationTree.set("parameters/blend_position", blend_position)
