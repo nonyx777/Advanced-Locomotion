@@ -11,6 +11,11 @@ extends Node3D
 	# Inputs are floating point numbers ranging from 0 to 1
 	# Force is applied naturally by just multiplying the force scalar by a matrix
 
+# TODO:
+	# Idle and Walk will be connected via BlendSpace1D
+	# Turn animations will be connected via OneShot node
+	# Both will be connected with Transition node
+
 
 # Both inputs and directions in WASD order
 var inputs: NDArray = nd.zeros([4, 1])
@@ -86,9 +91,26 @@ func tilt(delta: float) -> void:
 	characterBody.transform.basis = characterBody.transform.basis.slerp(characterBody.transform.basis.rotated(rotation_axis.normalized(), deg_to_rad(10.0)), snappiness * delta)
 
 func animation() -> void:
-	if last_velocity.normalized().dot(force_vec.normalized()) <= -0.8:
-		print("Turn 180")
 	animationTree.set("parameters/blend_position", blend_position)
+
+func turn_animation() -> void:
+	var forward: bool = Input.is_action_pressed("Forward")
+	var backward: bool = Input.is_action_pressed("Backward")
+	var left: bool = Input.is_action_pressed("Left")
+	var right: bool = Input.is_action_pressed("Right")
+	
+	if !forward and !backward and !left and !right:
+		return
+	
+	var angle: float = last_velocity.normalized().dot(force_vec.normalized())
+	var rel_dir: float = force_vec[0] * last_velocity[2] - force_vec[2] * last_velocity[0]
+	if angle <= -0.8:
+		print("Turn 180")
+	if angle <= 0.2 and angle >= -0.2:
+		if rel_dir >= 0:
+			print("Turn Left 90")
+		elif rel_dir < 0:
+			print("Turn Right 90")
 
 func _ready() -> void:
 	animationTree.active = true
@@ -100,5 +122,6 @@ func _process(delta: float) -> void:
 	movement(delta)
 	#tilt(delta)
 	animation()
-	characterBody.velocity = velocity
-	characterBody.move_and_slide()
+	turn_animation()
+	#characterBody.velocity = velocity
+	#characterBody.move_and_slide()
