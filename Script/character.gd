@@ -29,7 +29,7 @@ var prev_acceleration: Vector3
 var velocity: Vector3
 var force_vec: Vector3
 var drag: float = 0.9
-var snappiness: float = 3.0
+var snappiness: float = 1.0
 var target_angle: float
 var desired_rotation1: Quaternion
 var desired_rotation2: Quaternion
@@ -69,7 +69,7 @@ func movementOrientation(delta: float) -> void:
 	target_angle = atan2(key_direction.x, -key_direction.z) + camera_yaw
 	# Smoothly rotate to target rotation
 	desired_rotation1 = Quaternion(Vector3.UP, target_angle)
-	characterBody.transform.basis = Basis(characterBody.transform.basis.get_rotation_quaternion().slerp(desired_rotation1, snappiness * delta))
+	#characterBody.transform.basis = Basis(characterBody.transform.basis.get_rotation_quaternion().slerp(desired_rotation1, snappiness * delta))
 	force_vec = Vector3(sin(target_angle), 0.0, cos(target_angle))
 
 func movement(delta: float) -> void:
@@ -91,7 +91,8 @@ func tilt(delta: float) -> void:
 	characterBody.transform.basis = characterBody.transform.basis.slerp(characterBody.transform.basis.rotated(rotation_axis.normalized(), deg_to_rad(10.0)), snappiness * delta)
 
 func animation() -> void:
-	animationTree.set("parameters/blend_position", blend_position)
+	#animationTree.set("parameters/Locomotion/blend_position", blend_position)
+	pass
 
 func turn_animation() -> void:
 	var forward: bool = Input.is_action_pressed("Forward")
@@ -106,22 +107,32 @@ func turn_animation() -> void:
 	var rel_dir: float = force_vec[0] * last_velocity[2] - force_vec[2] * last_velocity[0]
 	if angle <= -0.8:
 		print("Turn 180")
+		animationTree.set("parameters/conditions/right_turn_180", true)
 	if angle <= 0.2 and angle >= -0.2:
 		if rel_dir >= 0:
 			print("Turn Left 90")
+			animationTree.set("parameters/conditions/left_turn_90", true)
 		elif rel_dir < 0:
 			print("Turn Right 90")
+			animationTree.set("parameters/conditions/right_turn_90", true)
 
 func _ready() -> void:
 	animationTree.active = true
+	animationTree.set("parameters/conditions/idle", true)
 
 func _process(delta: float) -> void:
 	last_velocity = velocity
-	process_input()
-	movementOrientation(delta)
-	movement(delta)
+	##process_input()
+	##movementOrientation(delta)
+	##movement(delta)
 	#tilt(delta)
-	animation()
-	turn_animation()
+	##animation()
+	##turn_animation()
 	#characterBody.velocity = velocity
+	var root_motion_pos = animationTree.get_root_motion_position()
+	var root_motion_quat = animationTree.get_root_motion_rotation()
+	var velocity = root_motion_quat * root_motion_pos / delta
+	#characterBody.transform.origin += root_motion.origin
+	characterBody.set_velocity(velocity)
+	characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
 	#characterBody.move_and_slide()
