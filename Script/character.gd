@@ -95,6 +95,8 @@ func animation() -> void:
 	pass
 
 func turn_animation() -> void:
+	reset_turn_triggers()
+	
 	var forward: bool = Input.is_action_pressed("Forward")
 	var backward: bool = Input.is_action_pressed("Backward")
 	var left: bool = Input.is_action_pressed("Left")
@@ -108,7 +110,6 @@ func turn_animation() -> void:
 	if angle <= -0.8:
 		print("Turn 180")
 		animationTree.set("parameters/conditions/right_turn_180", true)
-		animationTree.set("parameters/conditions/left_turn_90", false)
 	if angle <= 0.2 and angle >= -0.2:
 		if rel_dir >= 0:
 			print("Turn Left 90")
@@ -118,15 +119,20 @@ func turn_animation() -> void:
 			animationTree.set("parameters/conditions/right_turn_90", true)
 			animationTree.set("parameters/conditions/left_turn_90", false)
 
+func reset_turn_triggers():
+	animationTree.set("parameters/conditions/left_turn_90", false)
+	animationTree.set("parameters/conditions/right_turn_90", false)
+	animationTree.set("parameters/conditions/right_turn_180", false)
+
 func _ready() -> void:
 	animationTree.active = true
 	animationTree.set("parameters/conditions/idle", true)
 
 func _process(delta: float) -> void:
 	last_velocity = velocity
-	##process_input()
-	##movementOrientation(delta)
-	##movement(delta)
+	process_input()
+	movementOrientation(delta)
+	movement(delta)
 	#tilt(delta)
 	##animation()
 	turn_animation()
