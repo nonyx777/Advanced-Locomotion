@@ -108,6 +108,7 @@ func turn_animation() -> void:
 	if angle <= -0.8:
 		print("Turn 180")
 		animationTree.set("parameters/conditions/right_turn_180", true)
+		animationTree.set("parameters/conditions/left_turn_90", false)
 	if angle <= 0.2 and angle >= -0.2:
 		if rel_dir >= 0:
 			print("Turn Left 90")
@@ -115,6 +116,7 @@ func turn_animation() -> void:
 		elif rel_dir < 0:
 			print("Turn Right 90")
 			animationTree.set("parameters/conditions/right_turn_90", true)
+			animationTree.set("parameters/conditions/left_turn_90", false)
 
 func _ready() -> void:
 	animationTree.active = true
@@ -127,7 +129,7 @@ func _process(delta: float) -> void:
 	##movement(delta)
 	#tilt(delta)
 	##animation()
-	##turn_animation()
+	turn_animation()
 	#characterBody.velocity = velocity
 	var root_motion_pos = animationTree.get_root_motion_position()
 	var root_motion_quat = animationTree.get_root_motion_rotation()

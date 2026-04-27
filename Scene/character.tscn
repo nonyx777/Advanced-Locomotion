@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://g25ws7lotasa"]
+[gd_scene load_steps=29 format=3 uid="uid://g25ws7lotasa"]
 
 [ext_resource type="Script" uid="uid://ba4ff8gpkyn01" path="res://Script/character.gd" id="1_4lu42"]
 [ext_resource type="PackedScene" uid="uid://bs4lrevnghcbp" path="res://Animations/Tpose/Base.fbx" id="2_1cgd8"]
@@ -45,69 +45,60 @@ animation = &"Right Turn 180/right_turn_180"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_b1jne"]
 animation = &"Right Turn 180/right_turn_180"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_uk2ye"]
-animation = &"Right Turn 90/right_turn_90"
-
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_2ht62"]
 animation = &"Right Turn 90/right_turn_90"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_oncsw"]
-advance_mode = 2
-
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_1cgd8"]
-xfade_time = 0.1
-switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_bosnt"]
-xfade_time = 0.1
+xfade_time = 0.2
+advance_mode = 2
+advance_condition = &"right_turn_180"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_b1jne"]
+xfade_time = 0.2
 switch_mode = 2
 advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_oncsw"]
+xfade_time = 0.2
+advance_mode = 2
+advance_condition = &"right_turn_90"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_cp0d1"]
-xfade_time = 0.1
+xfade_time = 0.2
 switch_mode = 2
 advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_uk2ye"]
+xfade_time = 0.2
+switch_mode = 2
+advance_mode = 2
+advance_condition = &"!left_turn_90"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_v2g5y"]
-xfade_time = 0.1
-switch_mode = 2
+xfade_time = 0.2
 advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_jrvi5"]
-xfade_time = 0.1
-switch_mode = 2
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_6udgl"]
-xfade_time = 0.1
-switch_mode = 2
-advance_mode = 2
-
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_minn2"]
-xfade_time = 0.1
-switch_mode = 2
-advance_mode = 2
+advance_condition = &"left_turn_90"
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_oncsw"]
-states/End/position = Vector2(97, 346)
+states/End/position = Vector2(-52.3333, 106)
 states/Idle_idle/node = SubResource("AnimationNodeAnimation_1cgd8")
-states/Idle_idle/position = Vector2(832, 346)
+states/Idle_idle/position = Vector2(196, 212.667)
 "states/Left Turn 90_left_turn_90/node" = SubResource("AnimationNodeAnimation_bosnt")
 "states/Left Turn 90_left_turn_90/position" = Vector2(1144, 115)
 "states/Left Turn 90_left_turn_90 2/node" = SubResource("AnimationNodeAnimation_cp0d1")
-"states/Left Turn 90_left_turn_90 2/position" = Vector2(624, 346)
+"states/Left Turn 90_left_turn_90 2/position" = Vector2(-10.6667, 280.667)
 "states/Right Turn 180_right_turn_180/node" = SubResource("AnimationNodeAnimation_b1jne")
-"states/Right Turn 180_right_turn_180/position" = Vector2(416, 115)
+"states/Right Turn 180_right_turn_180/position" = Vector2(196.444, 384.333)
 "states/Right Turn 180_right_turn_180 2/node" = SubResource("AnimationNodeAnimation_oncsw")
 "states/Right Turn 180_right_turn_180 2/position" = Vector2(1144, 346)
 "states/Right Turn 90_right_turn_90/node" = SubResource("AnimationNodeAnimation_2ht62")
-"states/Right Turn 90_right_turn_90/position" = Vector2(748, 115)
-"states/Right Turn 90_right_turn_90 2/node" = SubResource("AnimationNodeAnimation_uk2ye")
-"states/Right Turn 90_right_turn_90 2/position" = Vector2(359, 346)
+"states/Right Turn 90_right_turn_90/position" = Vector2(424, 280.333)
 states/Start/position = Vector2(197, 115)
-transitions = ["Start", "Right Turn 180_right_turn_180", SubResource("AnimationNodeStateMachineTransition_oncsw"), "Right Turn 180_right_turn_180", "Right Turn 90_right_turn_90", SubResource("AnimationNodeStateMachineTransition_1cgd8"), "Right Turn 90_right_turn_90", "Left Turn 90_left_turn_90", SubResource("AnimationNodeStateMachineTransition_bosnt"), "Left Turn 90_left_turn_90", "Right Turn 180_right_turn_180 2", SubResource("AnimationNodeStateMachineTransition_cp0d1"), "Right Turn 180_right_turn_180 2", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_v2g5y"), "Idle_idle", "Left Turn 90_left_turn_90 2", SubResource("AnimationNodeStateMachineTransition_jrvi5"), "Left Turn 90_left_turn_90 2", "Right Turn 90_right_turn_90 2", SubResource("AnimationNodeStateMachineTransition_6udgl"), "Right Turn 90_right_turn_90 2", "End", SubResource("AnimationNodeStateMachineTransition_minn2")]
-graph_offset = Vector2(-350, -72)
+transitions = ["Start", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_1cgd8"), "Idle_idle", "Right Turn 180_right_turn_180", SubResource("AnimationNodeStateMachineTransition_bosnt"), "Right Turn 180_right_turn_180", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_b1jne"), "Idle_idle", "Right Turn 90_right_turn_90", SubResource("AnimationNodeStateMachineTransition_oncsw"), "Right Turn 90_right_turn_90", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_cp0d1"), "Left Turn 90_left_turn_90 2", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_uk2ye"), "Idle_idle", "Left Turn 90_left_turn_90 2", SubResource("AnimationNodeStateMachineTransition_v2g5y")]
+graph_offset = Vector2(-303.44, 61.7694)
 
 [sub_resource type="QuadMesh" id="QuadMesh_c5erk"]
 size = Vector2(10, 10)
@@ -156,6 +147,10 @@ root_motion_track = NodePath("%GeneralSkeleton:Root")
 root_motion_local = false
 tree_root = SubResource("AnimationNodeStateMachine_oncsw")
 anim_player = NodePath("../AnimationPlayer2")
+parameters/conditions/!left_turn_90 = false
+parameters/conditions/left_turn_90 = false
+parameters/conditions/right_turn_180 = false
+parameters/conditions/right_turn_90 = false
 
 [node name="Floor" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
