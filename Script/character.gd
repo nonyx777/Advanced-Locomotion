@@ -110,7 +110,7 @@ func turn_animation() -> void:
 	if angle <= -0.8:
 		print("Turn 180")
 		animationTree.set("parameters/conditions/right_turn_180", true)
-	if angle <= 0.2 and angle >= -0.2:
+	if angle <= 0.4 and angle >= -0.4:
 		if rel_dir >= 0:
 			print("Turn Left 90")
 			animationTree.set("parameters/conditions/left_turn_90", true)
@@ -129,7 +129,6 @@ func _ready() -> void:
 	animationTree.set("parameters/conditions/idle", true)
 
 func _process(delta: float) -> void:
-	last_velocity = velocity
 	process_input()
 	movementOrientation(delta)
 	movement(delta)
@@ -144,3 +143,4 @@ func _process(delta: float) -> void:
 	characterBody.set_velocity(velocity)
 	characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
 	#characterBody.move_and_slide()
+	last_velocity = characterBody.transform.basis.z
