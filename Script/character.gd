@@ -36,10 +36,15 @@ var desired_rotation2: Quaternion
 var direction_rotation: Quaternion
 var tilt_rotation: Quaternion
 
+# Turn correction
+var turn_direction: Vector3
+var delta_global: float
+var correct_rotation: bool = false
+
 # Animation Parameters
 @export var animationTree: AnimationTree
 var blend_position: float
-var last_velocity: Vector3
+var last_orientation: Vector3
 
 func process_input() -> void:
 	if Input.is_action_pressed("Forward"):
@@ -94,7 +99,7 @@ func animation() -> void:
 	#animationTree.set("parameters/Locomotion/blend_position", blend_position)
 	pass
 
-func turn_animation() -> void:
+func turn_animation(delta: float) -> void:
 	reset_turn_triggers()
 	
 	var forward: bool = Input.is_action_pressed("Forward")
@@ -104,43 +109,73 @@ func turn_animation() -> void:
 	
 	if !forward and !backward and !left and !right:
 		return
+		
+	turn_direction = force_vec
 	
-	var angle: float = last_velocity.normalized().dot(force_vec.normalized())
-	var rel_dir: float = force_vec[0] * last_velocity[2] - force_vec[2] * last_velocity[0]
+	var angle: float = last_orientation.normalized().dot(force_vec.normalized())
+	var rel_dir: float = force_vec[0] * last_orientation[2] - force_vec[2] * last_orientation[0]
 	if angle <= -0.8:
-		print("Turn 180")
+		#print("Turn 180")
 		animationTree.set("parameters/conditions/right_turn_180", true)
 	if angle <= 0.4 and angle >= -0.4:
 		if rel_dir >= 0:
-			print("Turn Left 90")
+			#print("Turn Left 90")
 			animationTree.set("parameters/conditions/left_turn_90", true)
 		elif rel_dir < 0:
-			print("Turn Right 90")
+			#print("Turn Right 90")
 			animationTree.set("parameters/conditions/right_turn_90", true)
-			animationTree.set("parameters/conditions/left_turn_90", false)
 
 func reset_turn_triggers():
 	animationTree.set("parameters/conditions/left_turn_90", false)
 	animationTree.set("parameters/conditions/right_turn_90", false)
 	animationTree.set("parameters/conditions/right_turn_180", false)
 
+func rotation_correction(delta: float):
+	if !correct_rotation:
+		return
+	
+	var current_fwd: Vector3 = characterBody.transform.basis.z
+	var current_rot: Vector2 = Vector2(current_fwd.x, current_fwd.z)
+	var target_rot: Vector2 = Vector2(turn_direction.x, turn_direction.z)
+	
+	if target_rot.dot(target_rot) == 0.0:
+		return
+	
+	var current_angle: float = current_rot.angle()
+	var target_angle: float = target_rot.angle()
+	
+	var delta_angle: float = target_angle - current_angle
+	delta_angle = fmod(delta_angle + PI, 2.0 * PI) - PI
+	
+	var rot_quat: Quaternion = Quaternion(Vector3.UP, -delta_angle * 0.05)
+	characterBody.set_quaternion(characterBody.get_quaternion() * rot_quat)
+
 func _ready() -> void:
 	animationTree.active = true
 	animationTree.set("parameters/conditions/idle", true)
 
 func _process(delta: float) -> void:
+	delta_global = delta
 	process_input()
 	movementOrientation(delta)
 	movement(delta)
 	#tilt(delta)
 	##animation()
-	turn_animation()
-	#characterBody.velocity = velocity
+	turn_animation(delta)
 	var root_motion_pos = animationTree.get_root_motion_position()
 	var root_motion_quat = animationTree.get_root_motion_rotation()
 	var velocity = root_motion_quat * root_motion_pos / delta
 	#characterBody.transform.origin += root_motion.origin
 	characterBody.set_velocity(velocity)
 	characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
+	rotation_correction(delta_global)
 	#characterBody.move_and_slide()
-	last_velocity = characterBody.transform.basis.z
+	last_orientation = characterBody.transform.basis.z
+
+
+func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
+	correct_rotation = true
+
+
+func _on_animation_tree_animation_started(anim_name: StringName) -> void:
+	correct_rotation = false

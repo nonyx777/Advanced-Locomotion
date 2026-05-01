@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://g25ws7lotasa"]
+[gd_scene load_steps=27 format=3 uid="uid://g25ws7lotasa"]
 
 [ext_resource type="Script" uid="uid://ba4ff8gpkyn01" path="res://Script/character.gd" id="1_4lu42"]
 [ext_resource type="PackedScene" uid="uid://bs4lrevnghcbp" path="res://Animations/Tpose/Base.fbx" id="2_1cgd8"]
@@ -36,12 +36,6 @@ animation = &"Idle/idle"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_cp0d1"]
 animation = &"Left Turn 90/left_turn_90"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_bosnt"]
-animation = &"Left Turn 90/left_turn_90"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_oncsw"]
-animation = &"Right Turn 180/right_turn_180"
-
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_b1jne"]
 animation = &"Right Turn 180/right_turn_180"
 
@@ -52,7 +46,6 @@ animation = &"Right Turn 90/right_turn_90"
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_bosnt"]
-xfade_time = 0.2
 advance_mode = 2
 advance_condition = &"right_turn_180"
 
@@ -62,7 +55,6 @@ switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_oncsw"]
-xfade_time = 0.2
 advance_mode = 2
 advance_condition = &"right_turn_90"
 
@@ -77,7 +69,6 @@ switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_v2g5y"]
-xfade_time = 0.2
 advance_mode = 2
 advance_condition = &"left_turn_90"
 
@@ -85,19 +76,15 @@ advance_condition = &"left_turn_90"
 states/End/position = Vector2(-52.3333, 106)
 states/Idle_idle/node = SubResource("AnimationNodeAnimation_1cgd8")
 states/Idle_idle/position = Vector2(196, 212.667)
-"states/Left Turn 90_left_turn_90/node" = SubResource("AnimationNodeAnimation_bosnt")
-"states/Left Turn 90_left_turn_90/position" = Vector2(1144, 115)
 "states/Left Turn 90_left_turn_90 2/node" = SubResource("AnimationNodeAnimation_cp0d1")
 "states/Left Turn 90_left_turn_90 2/position" = Vector2(-10.6667, 280.667)
 "states/Right Turn 180_right_turn_180/node" = SubResource("AnimationNodeAnimation_b1jne")
 "states/Right Turn 180_right_turn_180/position" = Vector2(196.444, 384.333)
-"states/Right Turn 180_right_turn_180 2/node" = SubResource("AnimationNodeAnimation_oncsw")
-"states/Right Turn 180_right_turn_180 2/position" = Vector2(1144, 346)
 "states/Right Turn 90_right_turn_90/node" = SubResource("AnimationNodeAnimation_2ht62")
 "states/Right Turn 90_right_turn_90/position" = Vector2(424, 280.333)
 states/Start/position = Vector2(197, 115)
 transitions = ["Start", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_1cgd8"), "Idle_idle", "Right Turn 180_right_turn_180", SubResource("AnimationNodeStateMachineTransition_bosnt"), "Right Turn 180_right_turn_180", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_b1jne"), "Idle_idle", "Right Turn 90_right_turn_90", SubResource("AnimationNodeStateMachineTransition_oncsw"), "Right Turn 90_right_turn_90", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_cp0d1"), "Left Turn 90_left_turn_90 2", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_uk2ye"), "Idle_idle", "Left Turn 90_left_turn_90 2", SubResource("AnimationNodeStateMachineTransition_v2g5y")]
-graph_offset = Vector2(-303.44, 61.7694)
+graph_offset = Vector2(-642.44, -10.2306)
 
 [sub_resource type="QuadMesh" id="QuadMesh_c5erk"]
 size = Vector2(10, 10)
@@ -131,7 +118,7 @@ mesh = SubResource("BoxMesh_qh0ih")
 
 [node name="Base" parent="CharacterBody3D" instance=ExtResource("2_1cgd8")]
 
-[node name="AnimationPlayer2" type="AnimationPlayer" parent="CharacterBody3D/Base"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="CharacterBody3D/Base"]
 libraries = {
 &"Idle": ExtResource("3_ohaor"),
 &"Left Turn 90": ExtResource("4_ep1am"),
@@ -141,11 +128,10 @@ libraries = {
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="CharacterBody3D/Base"]
-deterministic = false
 root_motion_track = NodePath("%GeneralSkeleton:Root")
 root_motion_local = false
 tree_root = SubResource("AnimationNodeStateMachine_oncsw")
-anim_player = NodePath("../AnimationPlayer2")
+anim_player = NodePath("../AnimationPlayer")
 parameters/conditions/left_turn_90 = false
 parameters/conditions/right_turn_180 = false
 parameters/conditions/right_turn_90 = false
@@ -153,3 +139,6 @@ parameters/conditions/right_turn_90 = false
 [node name="Floor" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 mesh = SubResource("QuadMesh_c5erk")
+
+[connection signal="animation_finished" from="CharacterBody3D/Base/AnimationTree" to="." method="_on_animation_tree_animation_finished"]
+[connection signal="animation_started" from="CharacterBody3D/Base/AnimationTree" to="." method="_on_animation_tree_animation_started"]
