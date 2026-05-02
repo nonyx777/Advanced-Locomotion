@@ -40,6 +40,7 @@ var tilt_rotation: Quaternion
 var turn_direction: Vector3
 var delta_global: float
 var correct_rotation: bool = false
+var able_to_turn: bool = true
 
 # Animation Parameters
 @export var animationTree: AnimationTree
@@ -101,6 +102,8 @@ func animation() -> void:
 
 func turn_animation(delta: float) -> void:
 	reset_turn_triggers()
+	if !able_to_turn:
+		return
 	
 	var forward: bool = Input.is_action_pressed("Forward")
 	var backward: bool = Input.is_action_pressed("Backward")
@@ -165,7 +168,7 @@ func _process(delta: float) -> void:
 	var root_motion_pos = animationTree.get_root_motion_position()
 	var root_motion_quat = animationTree.get_root_motion_rotation()
 	var velocity = root_motion_quat * root_motion_pos / delta
-	#characterBody.transform.origin += root_motion.origin
+	#characterBody.transform.origin += root_motion_pos
 	characterBody.set_velocity(velocity)
 	characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
 	rotation_correction(delta_global)
@@ -175,7 +178,11 @@ func _process(delta: float) -> void:
 
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
 	correct_rotation = true
+	able_to_turn = true
 
 
 func _on_animation_tree_animation_started(anim_name: StringName) -> void:
+	if anim_name == "Idle/idle":
+		return
 	correct_rotation = false
+	able_to_turn = false

@@ -42,9 +42,6 @@ animation = &"Right Turn 180/right_turn_180"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_2ht62"]
 animation = &"Right Turn 90/right_turn_90"
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_1cgd8"]
-advance_mode = 2
-
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_bosnt"]
 advance_mode = 2
 advance_condition = &"right_turn_180"
@@ -72,10 +69,13 @@ advance_mode = 2
 advance_mode = 2
 advance_condition = &"left_turn_90"
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_1cgd8"]
+advance_mode = 2
+
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_oncsw"]
 states/End/position = Vector2(-52.3333, 106)
 states/Idle_idle/node = SubResource("AnimationNodeAnimation_1cgd8")
-states/Idle_idle/position = Vector2(196, 212.667)
+states/Idle_idle/position = Vector2(195.634, 281.999)
 "states/Left Turn 90_left_turn_90 2/node" = SubResource("AnimationNodeAnimation_cp0d1")
 "states/Left Turn 90_left_turn_90 2/position" = Vector2(-10.6667, 280.667)
 "states/Right Turn 180_right_turn_180/node" = SubResource("AnimationNodeAnimation_b1jne")
@@ -83,8 +83,8 @@ states/Idle_idle/position = Vector2(196, 212.667)
 "states/Right Turn 90_right_turn_90/node" = SubResource("AnimationNodeAnimation_2ht62")
 "states/Right Turn 90_right_turn_90/position" = Vector2(424, 280.333)
 states/Start/position = Vector2(197, 115)
-transitions = ["Start", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_1cgd8"), "Idle_idle", "Right Turn 180_right_turn_180", SubResource("AnimationNodeStateMachineTransition_bosnt"), "Right Turn 180_right_turn_180", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_b1jne"), "Idle_idle", "Right Turn 90_right_turn_90", SubResource("AnimationNodeStateMachineTransition_oncsw"), "Right Turn 90_right_turn_90", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_cp0d1"), "Left Turn 90_left_turn_90 2", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_uk2ye"), "Idle_idle", "Left Turn 90_left_turn_90 2", SubResource("AnimationNodeStateMachineTransition_v2g5y")]
-graph_offset = Vector2(-642.44, -10.2306)
+transitions = ["Idle_idle", "Right Turn 180_right_turn_180", SubResource("AnimationNodeStateMachineTransition_bosnt"), "Right Turn 180_right_turn_180", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_b1jne"), "Idle_idle", "Right Turn 90_right_turn_90", SubResource("AnimationNodeStateMachineTransition_oncsw"), "Right Turn 90_right_turn_90", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_cp0d1"), "Left Turn 90_left_turn_90 2", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_uk2ye"), "Idle_idle", "Left Turn 90_left_turn_90 2", SubResource("AnimationNodeStateMachineTransition_v2g5y"), "Start", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_1cgd8")]
+graph_offset = Vector2(-267.51, 10.0634)
 
 [sub_resource type="QuadMesh" id="QuadMesh_c5erk"]
 size = Vector2(10, 10)
