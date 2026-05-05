@@ -1,12 +1,16 @@
-[gd_scene load_steps=27 format=3 uid="uid://g25ws7lotasa"]
+[gd_scene load_steps=41 format=3 uid="uid://g25ws7lotasa"]
 
 [ext_resource type="Script" uid="uid://ba4ff8gpkyn01" path="res://Script/character.gd" id="1_4lu42"]
 [ext_resource type="PackedScene" uid="uid://bs4lrevnghcbp" path="res://Animations/Tpose/Base.fbx" id="2_1cgd8"]
+[ext_resource type="AnimationLibrary" uid="uid://bhe6hx6yagfy8" path="res://Animations/Run/Action Idle to Standing Idle.res" id="3_cp0d1"]
 [ext_resource type="AnimationLibrary" uid="uid://cm7513rja7yyq" path="res://Animations/Idle/Idle.res" id="3_ohaor"]
 [ext_resource type="AnimationLibrary" uid="uid://bmayjqpewh8aq" path="res://Animations/Turn/Left Turn 90.res" id="4_ep1am"]
 [ext_resource type="AnimationLibrary" uid="uid://dn01cp5r8p63h" path="res://Animations/Turn/Right Turn 180.res" id="5_1cgd8"]
 [ext_resource type="AnimationLibrary" uid="uid://c7bbkc8fuljmj" path="res://Animations/Turn/Right Turn 90.res" id="5_2ht62"]
+[ext_resource type="AnimationLibrary" uid="uid://bwhc4w3o1f5le" path="res://Animations/Run/Idle to Sprint.res" id="5_uk2ye"]
 [ext_resource type="AnimationLibrary" uid="uid://bngrmtjn1t7v6" path="res://Animations/Walk/Walking.res" id="5_vj8le"]
+[ext_resource type="AnimationLibrary" uid="uid://chtpwaya1tao6" path="res://Animations/Run/Run To Stop.res" id="9_v2g5y"]
+[ext_resource type="AnimationLibrary" uid="uid://dwj6eav4mdiqv" path="res://Animations/Run/Running.res" id="10_jrvi5"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_cpq5r"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -30,6 +34,12 @@ height = 1.76712
 [sub_resource type="BoxMesh" id="BoxMesh_qh0ih"]
 size = Vector3(0.5, 0.2, 0.5)
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_6udgl"]
+animation = &"Action Idle to Standing Idle/action_idle_to_standing_idle"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_uk2ye"]
+animation = &"Idle to Sprint/idle_to_sprint"
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_1cgd8"]
 animation = &"Idle/idle"
 
@@ -41,6 +51,12 @@ animation = &"Right Turn 180/right_turn_180"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_2ht62"]
 animation = &"Right Turn 90/right_turn_90"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_v2g5y"]
+animation = &"Run To Stop/run_to_stop"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_jrvi5"]
+animation = &"Running/running"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_bosnt"]
 advance_mode = 2
@@ -72,19 +88,57 @@ advance_condition = &"left_turn_90"
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_1cgd8"]
 advance_mode = 2
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_6udgl"]
+xfade_time = 0.3
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_minn2"]
+xfade_time = 0.1
+advance_mode = 2
+advance_condition = &"stop_run"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_jrvi5"]
+xfade_time = 0.1
+advance_mode = 2
+advance_condition = &"start_run"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_kfm7y"]
+xfade_time = 0.1
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_73ll3"]
+xfade_time = 0.5
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_ljc6b"]
+xfade_time = 0.1
+advance_mode = 2
+advance_condition = &"start_run"
+
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_oncsw"]
+"states/Action Idle to Standing Idle_action_idle_to_standing_idle/node" = SubResource("AnimationNodeAnimation_6udgl")
+"states/Action Idle to Standing Idle_action_idle_to_standing_idle/position" = Vector2(570.49, 466.063)
 states/End/position = Vector2(-52.3333, 106)
+"states/Idle to Sprint_idle_to_sprint/node" = SubResource("AnimationNodeAnimation_uk2ye")
+"states/Idle to Sprint_idle_to_sprint/position" = Vector2(195.634, 466.063)
 states/Idle_idle/node = SubResource("AnimationNodeAnimation_1cgd8")
 states/Idle_idle/position = Vector2(195.634, 281.999)
 "states/Left Turn 90_left_turn_90 2/node" = SubResource("AnimationNodeAnimation_cp0d1")
-"states/Left Turn 90_left_turn_90 2/position" = Vector2(-10.6667, 280.667)
+"states/Left Turn 90_left_turn_90 2/position" = Vector2(1.3333, 197.667)
 "states/Right Turn 180_right_turn_180/node" = SubResource("AnimationNodeAnimation_b1jne")
-"states/Right Turn 180_right_turn_180/position" = Vector2(196.444, 384.333)
+"states/Right Turn 180_right_turn_180/position" = Vector2(1.3333, 345.333)
 "states/Right Turn 90_right_turn_90/node" = SubResource("AnimationNodeAnimation_2ht62")
 "states/Right Turn 90_right_turn_90/position" = Vector2(424, 280.333)
+"states/Run To Stop_run_to_stop/node" = SubResource("AnimationNodeAnimation_v2g5y")
+"states/Run To Stop_run_to_stop/position" = Vector2(465, 584.063)
+states/Running_running/node = SubResource("AnimationNodeAnimation_jrvi5")
+states/Running_running/position = Vector2(197, 584.063)
 states/Start/position = Vector2(197, 115)
-transitions = ["Idle_idle", "Right Turn 180_right_turn_180", SubResource("AnimationNodeStateMachineTransition_bosnt"), "Right Turn 180_right_turn_180", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_b1jne"), "Idle_idle", "Right Turn 90_right_turn_90", SubResource("AnimationNodeStateMachineTransition_oncsw"), "Right Turn 90_right_turn_90", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_cp0d1"), "Left Turn 90_left_turn_90 2", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_uk2ye"), "Idle_idle", "Left Turn 90_left_turn_90 2", SubResource("AnimationNodeStateMachineTransition_v2g5y"), "Start", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_1cgd8")]
-graph_offset = Vector2(-267.51, 10.0634)
+transitions = ["Idle_idle", "Right Turn 180_right_turn_180", SubResource("AnimationNodeStateMachineTransition_bosnt"), "Right Turn 180_right_turn_180", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_b1jne"), "Idle_idle", "Right Turn 90_right_turn_90", SubResource("AnimationNodeStateMachineTransition_oncsw"), "Right Turn 90_right_turn_90", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_cp0d1"), "Left Turn 90_left_turn_90 2", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_uk2ye"), "Idle_idle", "Left Turn 90_left_turn_90 2", SubResource("AnimationNodeStateMachineTransition_v2g5y"), "Start", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_1cgd8"), "Idle to Sprint_idle_to_sprint", "Running_running", SubResource("AnimationNodeStateMachineTransition_6udgl"), "Running_running", "Run To Stop_run_to_stop", SubResource("AnimationNodeStateMachineTransition_minn2"), "Idle_idle", "Idle to Sprint_idle_to_sprint", SubResource("AnimationNodeStateMachineTransition_jrvi5"), "Run To Stop_run_to_stop", "Action Idle to Standing Idle_action_idle_to_standing_idle", SubResource("AnimationNodeStateMachineTransition_kfm7y"), "Action Idle to Standing Idle_action_idle_to_standing_idle", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_73ll3"), "Action Idle to Standing Idle_action_idle_to_standing_idle", "Idle to Sprint_idle_to_sprint", SubResource("AnimationNodeStateMachineTransition_ljc6b")]
+graph_offset = Vector2(-765.51, 37.0634)
 
 [sub_resource type="QuadMesh" id="QuadMesh_c5erk"]
 size = Vector2(10, 10)
@@ -120,14 +174,19 @@ mesh = SubResource("BoxMesh_qh0ih")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="CharacterBody3D/Base"]
 libraries = {
+&"Action Idle to Standing Idle": ExtResource("3_cp0d1"),
 &"Idle": ExtResource("3_ohaor"),
+&"Idle to Sprint": ExtResource("5_uk2ye"),
 &"Left Turn 90": ExtResource("4_ep1am"),
 &"Right Turn 180": ExtResource("5_1cgd8"),
 &"Right Turn 90": ExtResource("5_2ht62"),
+&"Run To Stop": ExtResource("9_v2g5y"),
+&"Running": ExtResource("10_jrvi5"),
 &"Walking": ExtResource("5_vj8le")
 }
 
 [node name="AnimationTree" type="AnimationTree" parent="CharacterBody3D/Base"]
+active = false
 root_motion_track = NodePath("%GeneralSkeleton:Root")
 root_motion_local = false
 tree_root = SubResource("AnimationNodeStateMachine_oncsw")
@@ -135,6 +194,8 @@ anim_player = NodePath("../AnimationPlayer")
 parameters/conditions/left_turn_90 = false
 parameters/conditions/right_turn_180 = false
 parameters/conditions/right_turn_90 = false
+parameters/conditions/start_run = false
+parameters/conditions/stop_run = false
 
 [node name="Floor" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
