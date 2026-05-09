@@ -118,20 +118,22 @@ func turn_animation(delta: float) -> void:
 		animationTree.set("parameters/conditions/right_turn_180", true)
 	if angle <= 0.4 and angle >= -0.4:
 		if rel_dir >= 0:
-			#print("Turn Left 90")
 			animationTree.set("parameters/conditions/left_turn_90", true)
 		elif rel_dir < 0:
-			#print("Turn Right 90")
 			animationTree.set("parameters/conditions/right_turn_90", true)
 
 func movement_animation() -> void:
 	reset_move_triggers()
 	
-	if key_direction.length() < 0.1:
+	if !forward and !backward and !left and !right:
 		animationTree.set("parameters/conditions/stop_run", true)
 		return
 	
-	animationTree.set("parameters/conditions/start_run", true)
+	var angle: float = last_orientation.normalized().dot(force_vec.normalized())
+	if angle <= -0.8:
+		animationTree.set("parameters/conditions/run_turn_180", true)
+	else:
+		animationTree.set("parameters/conditions/start_run", true)
 
 func reset_turn_triggers():
 	animationTree.set("parameters/conditions/left_turn_90", false)
@@ -141,6 +143,7 @@ func reset_turn_triggers():
 func reset_move_triggers():
 	animationTree.set("parameters/conditions/start_run", false)
 	animationTree.set("parameters/conditions/stop_run", false)
+	animationTree.set("parameters/conditions/run_turn_180", false)
 
 func rotation_correction(delta: float):
 	if !correct_rotation:
@@ -165,13 +168,13 @@ func rotation_correction(delta: float):
 func _ready() -> void:
 	animationTree.active = true
 	animationTree.set("parameters/conditions/idle", true)
-	
+
+func _process(delta: float) -> void:
 	forward = Input.is_action_pressed("Forward")
 	backward = Input.is_action_pressed("Backward")
 	left = Input.is_action_pressed("Left")
 	right = Input.is_action_pressed("Right")
-
-func _process(delta: float) -> void:
+	
 	var temp: bool = true
 	# general
 	process_input()
@@ -190,6 +193,7 @@ func _process(delta: float) -> void:
 		# moving
 		movement_animation()
 		var root_motion_pos = animationTree.get_root_motion_position()
+		var root_motion_quat = animationTree.get_root_motion_rotation()
 		
 		var char_orientation: Vector3 = characterBody.transform.basis.z
 		var char_orientation_norm: Vector3 = char_orientation.normalized()
@@ -199,13 +203,15 @@ func _process(delta: float) -> void:
 		characterBody.set_velocity(velocity)
 		if !dont_rotate_while_stopping:
 			characterBody.transform.basis = Basis(characterBody.transform.basis.get_rotation_quaternion().slerp(desired_rotation, snappiness * delta))
+		else:
+			characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
 		characterBody.move_and_slide()
 	
 	last_orientation = characterBody.transform.basis.z
 
 
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
-	if anim_name == "Run To Stop/run_to_stop":
+	if anim_name == "Run To Stop/run_to_stop" or anim_name == "Run Turn 180/run_turn_180":
 		dont_rotate_while_stopping = false
 	correct_rotation = true
 	able_to_turn = true
@@ -214,7 +220,7 @@ func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
 func _on_animation_tree_animation_started(anim_name: StringName) -> void:
 	if anim_name == "Idle/idle":
 		return
-	if anim_name == "Run To Stop/run_to_stop":
+	if anim_name == "Run To Stop/run_to_stop" or anim_name == "Run Turn 180/run_turn_180":
 		dont_rotate_while_stopping = true
 	correct_rotation = false
 	able_to_turn = false
