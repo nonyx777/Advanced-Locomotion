@@ -23,13 +23,11 @@ var directions: NDArray = nd.array([[0, 0, 1], [-1, 0, 0], [0, 0, -1], [1, 0, 0]
 var key_direction: Vector3
 
 # Linear Movement
-@export var force: float = 20
 var acceleration: Vector3
 var prev_acceleration: Vector3
 var velocity: Vector3
 var force_vec: Vector3
-var drag: float = 0.9
-var snappiness: float = 3.0
+var snappiness: float = 5.0
 var target_angle: float
 var desired_rotation: Quaternion
 var direction_rotation: Quaternion
@@ -82,12 +80,6 @@ func orientation(delta: float) -> void:
 	# Smoothly rotate to target rotation
 	desired_rotation = Quaternion(Vector3.UP, target_angle)
 	force_vec = Vector3(sin(target_angle), 0.0, cos(target_angle))
-
-func movement(delta: float) -> void:
-	acceleration *= 0.0
-	acceleration = force_vec * force
-	velocity += acceleration * delta
-	velocity *= drag
 
 func tilt(delta: float) -> void:
 	# cross product between local y and acceleraction vector

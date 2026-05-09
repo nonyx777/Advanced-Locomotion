@@ -160,7 +160,6 @@ size = Vector2(10, 10)
 
 [node name="Character" type="Node3D" node_paths=PackedStringArray("animationTree")]
 script = ExtResource("1_4lu42")
-force = 11.0
 animationTree = NodePath("CharacterBody3D/Base/AnimationTree")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
