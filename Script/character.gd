@@ -61,6 +61,7 @@ const TAP_THRESHOLD: float = 0.01
 const PRESS_THRESHOLD: float = 0.3
 var hold_time: float = 0.0
 var should_turn: bool = false
+var should_move: bool = false
 var turn_triggered: bool = false
 
 var anim_exceptions = Array(["Run To Stop/run_to_stop", "Run Turn 180/run_turn_180", "Action Idle to Standing Idle/action_idle_to_standing_idle"])
@@ -209,15 +210,20 @@ func _process(delta: float) -> void:
 	# if key slightly pressed
 	if any_key_released and !should_turn:
 		print("Tapped: ", hold_time)
-		if hold_time > TAP_THRESHOLD and hold_time <= PRESS_THRESHOLD:
+		if hold_time > TAP_THRESHOLD and hold_time <= PRESS_THRESHOLD and !should_move:
 			should_turn = true
 			turn_triggered = true
 		
 		hold_time = 0.0
+	elif any_key_pressed:
+		if hold_time > PRESS_THRESHOLD:
+			should_move = true
+			
 	
 	if should_turn:
 		manage_turn(delta)
-	#manage_movement(delta)
+	elif should_move:
+		manage_movement(delta)
 	
 	last_orientation = characterBody.transform.basis.z
 
@@ -225,6 +231,8 @@ func _process(delta: float) -> void:
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
 	if anim_name in anim_exceptions or anim_name in turn_animations:
 		dont_rotate_while_stopping = false
+	if anim_name == "Action Idle to Standing Idle/action_idle_to_standing_idle":
+		should_move = false
 	correct_rotation = true
 	able_to_turn = true
 
