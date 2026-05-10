@@ -50,21 +50,36 @@ var forward: bool
 var backward: bool
 var left: bool
 var right: bool
+var any_key_pressed: bool
+var forward_released: bool
+var backward_released: bool
+var left_released: bool
+var right_released: bool
+var any_key_released: bool
+
+const TAP_THRESHOLD: float = 0.01
+const PRESS_THRESHOLD: float = 0.3
+var hold_time: float = 0.0
+var should_turn: bool = false
+var turn_triggered: bool = false
+
+var anim_exceptions = Array(["Run To Stop/run_to_stop", "Run Turn 180/run_turn_180", "Action Idle to Standing Idle/action_idle_to_standing_idle"])
+var turn_animations = Array(["Left Turn 90/left_turn_90 2", "Right Turn 180/right_turn_180", "Right Turn 90/right_turn_90"])
 
 func process_input() -> void:
-	if Input.is_action_pressed("Forward"):
+	if forward:
 		inputs.set(1.0, 0, 0)
 	else:
 		inputs.set(0.0, 0, 0)
-	if Input.is_action_pressed("Left"):
+	if left:
 		inputs.set(1.0, 1, 0)
 	else:
 		inputs.set(0.0, 1, 0)
-	if Input.is_action_pressed("Backward"):
+	if backward:
 		inputs.set(1.0, 2, 0)
 	else:
 		inputs.set(0.0, 2, 0)
-	if Input.is_action_pressed("Right"):
+	if right:
 		inputs.set(1.0, 3, 0)
 	else:
 		inputs.set(0.0, 3, 0)
@@ -72,41 +87,27 @@ func process_input() -> void:
 func orientation(delta: float) -> void:
 	key_direction = nd.sum(nd.multiply(directions, inputs), 0).to_vector3().normalized()
 	blend_position = velocity.length()
-	if key_direction.length() < 0.1:
-		force_vec *= 0.0
-		return
-	var camera_yaw: float = camera.transform.basis.get_euler().y
-	target_angle = atan2(key_direction.x, -key_direction.z) + camera_yaw
-	# Smoothly rotate to target rotation
-	desired_rotation = Quaternion(Vector3.UP, target_angle)
-	force_vec = Vector3(sin(target_angle), 0.0, cos(target_angle))
-
-func tilt(delta: float) -> void:
-	# cross product between local y and acceleraction vector
-	var norm_local_y: Vector3 = characterBody.transform.basis.y.normalized()
-	var norm_acc: Vector3 = acceleration.normalized()
-	var rotation_axis: Vector3 = norm_local_y.cross(norm_acc)
-	if rotation_axis == Vector3.ZERO:
-		var t = Quaternion.from_euler(Vector3(0.0, desired_rotation.get_euler().y, 0.0))
-		characterBody.transform.basis = Basis(characterBody.transform.basis.get_rotation_quaternion().slerp(t, snappiness * delta))
-		return
-	
-	characterBody.transform.basis = characterBody.transform.basis.slerp(characterBody.transform.basis.rotated(rotation_axis.normalized(), deg_to_rad(10.0)), snappiness * delta)
+	if key_direction.length() > 0.1:
+		var camera_yaw: float = camera.transform.basis.get_euler().y
+		target_angle = atan2(key_direction.x, -key_direction.z) + camera_yaw
+		# Smoothly rotate to target rotation
+		desired_rotation = Quaternion(Vector3.UP, target_angle)
+		force_vec = Vector3(sin(target_angle), 0.0, cos(target_angle))
 
 func turn_animation(delta: float) -> void:
-	reset_turn_triggers()
 	if !able_to_turn:
 		return
-	
-	if !forward and !backward and !left and !right:
+		
+	if !turn_triggered:
 		return
 		
 	turn_direction = force_vec
+	turn_triggered = false
 	
-	var angle: float = last_orientation.normalized().dot(force_vec.normalized())
-	var rel_dir: float = force_vec[0] * last_orientation[2] - force_vec[2] * last_orientation[0]
+	
+	var angle: float = last_orientation.normalized().dot(turn_direction.normalized())
+	var rel_dir: float = turn_direction[0] * last_orientation[2] - turn_direction[2] * last_orientation[0]
 	if angle <= -0.8:
-		#print("Turn 180")
 		animationTree.set("parameters/conditions/right_turn_180", true)
 	if angle <= 0.4 and angle >= -0.4:
 		if rel_dir >= 0:
@@ -115,9 +116,7 @@ func turn_animation(delta: float) -> void:
 			animationTree.set("parameters/conditions/right_turn_90", true)
 
 func movement_animation() -> void:
-	reset_move_triggers()
-	
-	if !forward and !backward and !left and !right:
+	if !any_key_pressed:
 		animationTree.set("parameters/conditions/stop_run", true)
 		return
 	
@@ -144,10 +143,7 @@ func rotation_correction(delta: float):
 	var current_fwd: Vector3 = characterBody.transform.basis.z
 	var current_rot: Vector2 = Vector2(current_fwd.x, current_fwd.z)
 	var target_rot: Vector2 = Vector2(turn_direction.x, turn_direction.z)
-	
-	if target_rot.dot(target_rot) == 0.0:
-		return
-	
+		
 	var current_angle: float = current_rot.angle()
 	var target_angle: float = target_rot.angle()
 	
@@ -156,54 +152,78 @@ func rotation_correction(delta: float):
 	
 	var rot_quat: Quaternion = Quaternion(Vector3.UP, -delta_angle * 0.05)
 	characterBody.set_quaternion(characterBody.get_quaternion() * rot_quat)
+	if delta_angle <= 0.2 and delta_angle >= -0.2:
+		should_turn = false
+
+func manage_turn(delta: float) -> void:
+	turn_animation(delta)
+	var root_motion_pos = animationTree.get_root_motion_position()
+	var root_motion_quat = animationTree.get_root_motion_rotation()
+	var velocity = root_motion_quat * root_motion_pos / delta
+	characterBody.set_velocity(velocity)
+	characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
+	rotation_correction(delta)
+
+func manage_movement(delta: float) -> void:
+	movement_animation()
+	var root_motion_pos = animationTree.get_root_motion_position()
+	var root_motion_quat = animationTree.get_root_motion_rotation()
+	
+	var char_orientation: Vector3 = characterBody.transform.basis.z
+	var char_orientation_norm: Vector3 = char_orientation.normalized()
+	var move_amount: float = root_motion_pos.length()
+	var velocity = (char_orientation_norm * move_amount) / delta
+	
+	characterBody.set_velocity(velocity)
+	if !dont_rotate_while_stopping:
+		characterBody.transform.basis = Basis(characterBody.transform.basis.get_rotation_quaternion().slerp(desired_rotation, snappiness * delta))
+	else:
+		characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
+		desired_rotation = characterBody.get_quaternion() * root_motion_quat
+	characterBody.move_and_slide()
 
 func _ready() -> void:
 	animationTree.active = true
 	animationTree.set("parameters/conditions/idle", true)
 
 func _process(delta: float) -> void:
+	reset_move_triggers()
+	reset_turn_triggers()
+	
 	forward = Input.is_action_pressed("Forward")
 	backward = Input.is_action_pressed("Backward")
 	left = Input.is_action_pressed("Left")
 	right = Input.is_action_pressed("Right")
+	any_key_pressed = forward or backward or left or right
+	forward_released = Input.is_action_just_released("Forward")
+	backward_released = Input.is_action_just_released("Backward")
+	left_released = Input.is_action_just_released("Left")
+	right_released = Input.is_action_just_released("Right")
+	any_key_released = forward_released or backward_released or left_released or right_released
 	
-	var temp: bool = true
+	if any_key_pressed:
+		hold_time += delta
 	# general
 	process_input()
 	orientation(delta)
 	# if key slightly pressed
-	if !temp:
-		# turning
-		turn_animation(delta)
-		var root_motion_pos = animationTree.get_root_motion_position()
-		var root_motion_quat = animationTree.get_root_motion_rotation()
-		var velocity = root_motion_quat * root_motion_pos / delta
-		characterBody.set_velocity(velocity)
-		characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
-		rotation_correction(delta)
-	else:
-		# moving
-		movement_animation()
-		var root_motion_pos = animationTree.get_root_motion_position()
-		var root_motion_quat = animationTree.get_root_motion_rotation()
+	if any_key_released and !should_turn:
+		print("Tapped: ", hold_time)
+		if hold_time > TAP_THRESHOLD and hold_time <= PRESS_THRESHOLD:
+			should_turn = true
+			turn_triggered = true
 		
-		var char_orientation: Vector3 = characterBody.transform.basis.z
-		var char_orientation_norm: Vector3 = char_orientation.normalized()
-		var move_amount: float = root_motion_pos.length()
-		var velocity = (char_orientation_norm * move_amount) / delta
-		
-		characterBody.set_velocity(velocity)
-		if !dont_rotate_while_stopping:
-			characterBody.transform.basis = Basis(characterBody.transform.basis.get_rotation_quaternion().slerp(desired_rotation, snappiness * delta))
-		else:
-			characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
-		characterBody.move_and_slide()
+		hold_time = 0.0
+	
+	if should_turn:
+		manage_turn(delta)
+	#manage_movement(delta)
 	
 	last_orientation = characterBody.transform.basis.z
 
 
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
-	if anim_name == "Run To Stop/run_to_stop" or anim_name == "Run Turn 180/run_turn_180":
+	if anim_name in anim_exceptions or anim_name in turn_animations:
 		dont_rotate_while_stopping = false
 	correct_rotation = true
 	able_to_turn = true
@@ -212,7 +232,7 @@ func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
 func _on_animation_tree_animation_started(anim_name: StringName) -> void:
 	if anim_name == "Idle/idle":
 		return
-	if anim_name == "Run To Stop/run_to_stop" or anim_name == "Run Turn 180/run_turn_180":
+	if anim_name in anim_exceptions or anim_name in turn_animations:
 		dont_rotate_while_stopping = true
 	correct_rotation = false
 	able_to_turn = false

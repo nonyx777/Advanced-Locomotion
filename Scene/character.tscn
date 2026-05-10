@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=3 uid="uid://g25ws7lotasa"]
+[gd_scene load_steps=45 format=3 uid="uid://g25ws7lotasa"]
 
 [ext_resource type="Script" uid="uid://ba4ff8gpkyn01" path="res://Script/character.gd" id="1_4lu42"]
 [ext_resource type="PackedScene" uid="uid://bs4lrevnghcbp" path="res://Animations/Tpose/Base.fbx" id="2_1cgd8"]
@@ -29,6 +29,8 @@ glow_enabled = true
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qtrob"]
 radius = 0.367349
 height = 1.76712
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_xasoo"]
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_6udgl"]
 animation = &"Action Idle to Standing Idle/action_idle_to_standing_idle"
@@ -138,7 +140,7 @@ states/End/position = Vector2(-52.3333, 106)
 "states/Idle to Sprint_idle_to_sprint/node" = SubResource("AnimationNodeAnimation_uk2ye")
 "states/Idle to Sprint_idle_to_sprint/position" = Vector2(195.634, 466.063)
 states/Idle_idle/node = SubResource("AnimationNodeAnimation_1cgd8")
-states/Idle_idle/position = Vector2(195.634, 281.999)
+states/Idle_idle/position = Vector2(195.634, 280.333)
 "states/Left Turn 90_left_turn_90 2/node" = SubResource("AnimationNodeAnimation_cp0d1")
 "states/Left Turn 90_left_turn_90 2/position" = Vector2(1.3333, 197.667)
 "states/Right Turn 180_right_turn_180/node" = SubResource("AnimationNodeAnimation_b1jne")
@@ -153,7 +155,7 @@ states/Running_running/node = SubResource("AnimationNodeAnimation_jrvi5")
 states/Running_running/position = Vector2(197, 584.063)
 states/Start/position = Vector2(197, 115)
 transitions = ["Idle_idle", "Right Turn 180_right_turn_180", SubResource("AnimationNodeStateMachineTransition_bosnt"), "Right Turn 180_right_turn_180", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_b1jne"), "Idle_idle", "Right Turn 90_right_turn_90", SubResource("AnimationNodeStateMachineTransition_oncsw"), "Right Turn 90_right_turn_90", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_cp0d1"), "Left Turn 90_left_turn_90 2", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_uk2ye"), "Idle_idle", "Left Turn 90_left_turn_90 2", SubResource("AnimationNodeStateMachineTransition_v2g5y"), "Start", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_1cgd8"), "Idle to Sprint_idle_to_sprint", "Running_running", SubResource("AnimationNodeStateMachineTransition_6udgl"), "Running_running", "Run To Stop_run_to_stop", SubResource("AnimationNodeStateMachineTransition_minn2"), "Idle_idle", "Idle to Sprint_idle_to_sprint", SubResource("AnimationNodeStateMachineTransition_jrvi5"), "Run To Stop_run_to_stop", "Action Idle to Standing Idle_action_idle_to_standing_idle", SubResource("AnimationNodeStateMachineTransition_kfm7y"), "Action Idle to Standing Idle_action_idle_to_standing_idle", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_73ll3"), "Action Idle to Standing Idle_action_idle_to_standing_idle", "Idle to Sprint_idle_to_sprint", SubResource("AnimationNodeStateMachineTransition_ljc6b"), "Running_running", "Run Turn 180_run_turn_180", SubResource("AnimationNodeStateMachineTransition_ilft0"), "Run Turn 180_run_turn_180", "Run To Stop_run_to_stop", SubResource("AnimationNodeStateMachineTransition_087ws"), "Run Turn 180_run_turn_180", "Idle to Sprint_idle_to_sprint", SubResource("AnimationNodeStateMachineTransition_inwfv")]
-graph_offset = Vector2(-817.51, 367.063)
+graph_offset = Vector2(-336.51, 101.063)
 
 [sub_resource type="QuadMesh" id="QuadMesh_c5erk"]
 size = Vector2(10, 10)
@@ -185,6 +187,7 @@ libraries = {
 &"Left Turn 90": ExtResource("4_ep1am"),
 &"Right Turn 180": ExtResource("5_1cgd8"),
 &"Right Turn 90": ExtResource("5_2ht62"),
+&"Run 180 Turn": SubResource("AnimationLibrary_xasoo"),
 &"Run To Stop": ExtResource("9_v2g5y"),
 &"Run Turn 180": ExtResource("10_uk2ye"),
 &"Running": ExtResource("10_jrvi5"),
