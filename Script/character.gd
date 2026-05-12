@@ -2,36 +2,17 @@ extends Node3D
 @onready var characterBody: CharacterBody3D = $CharacterBody3D
 @onready var camera: Camera3D = $"../Camera3D"
 
-# TODO:
-	# Move
-	# Rotate towards the direction of movement
-	# Tilt While Moving
-
-# IDEA:
-	# Inputs are floating point numbers ranging from 0 to 1
-	# Force is applied naturally by just multiplying the force scalar by a matrix
-
-# TODO:
-	# Idle and Walk will be connected via BlendSpace1D
-	# Turn animations will be connected via OneShot node
-	# Both will be connected with Transition node
-
-
 # Both inputs and directions in WASD order
-var inputs: NDArray = nd.zeros([4, 1])
-var directions: NDArray = nd.array([[0, 0, 1], [-1, 0, 0], [0, 0, -1], [1, 0, 0]], nd.Float32)
+var inputs: NDArray = nd.zeros([4, 1], nd.Int8)
+var directions: NDArray = nd.array([[0, 0, 1], [-1, 0, 0], [0, 0, -1], [1, 0, 0]], nd.Int8)
 var key_direction: Vector3
 
 # Linear Movement
-var acceleration: Vector3
-var prev_acceleration: Vector3
 var velocity: Vector3
 var force_vec: Vector3
 var snappiness: float = 5.0
 var target_angle: float
 var desired_rotation: Quaternion
-var direction_rotation: Quaternion
-var tilt_rotation: Quaternion
 
 # Turn correction
 var turn_direction: Vector3
@@ -42,7 +23,6 @@ var dont_rotate_while_stopping: bool = false
 
 # Animation Parameters
 @export var animationTree: AnimationTree
-var blend_position: float
 var last_orientation: Vector3
 
 # keys
@@ -62,32 +42,33 @@ const PRESS_THRESHOLD: float = 0.1
 var hold_time: float = 0.0
 var should_turn: bool = false
 var should_move: bool = false
-var turn_triggered: bool = false
 
-var anim_exceptions = Array(["Run To Stop/run_to_stop", "Run Turn 180/run_turn_180", "Action Idle to Standing Idle/action_idle_to_standing_idle"])
-var turn_animations = Array(["Left Turn 90/left_turn_90 2", "Right Turn 180/right_turn_180", "Right Turn 90/right_turn_90"])
+var anim_exceptions = Array(["Run To Stop/run_to_stop", "Run Turn 180/run_turn_180", 
+"Action Idle to Standing Idle/action_idle_to_standing_idle", "Left Turn 90/left_turn_90 2", 
+"Right Turn 180/right_turn_180", "Right Turn 90/right_turn_90"])
+const ACTION_STANDING_TO_IDLE_STANDING: String = "Action Idle to Standing Idle/action_idle_to_standing_idle"
+const IDLE: String = "Idle/idle"
 
 func process_input() -> void:
 	if forward:
-		inputs.set(1.0, 0, 0)
+		inputs.set(1, 0, 0)
 	else:
-		inputs.set(0.0, 0, 0)
+		inputs.set(0, 0, 0)
 	if left:
-		inputs.set(1.0, 1, 0)
+		inputs.set(1, 1, 0)
 	else:
-		inputs.set(0.0, 1, 0)
+		inputs.set(0, 1, 0)
 	if backward:
-		inputs.set(1.0, 2, 0)
+		inputs.set(1, 2, 0)
 	else:
-		inputs.set(0.0, 2, 0)
+		inputs.set(0, 2, 0)
 	if right:
-		inputs.set(1.0, 3, 0)
+		inputs.set(1, 3, 0)
 	else:
-		inputs.set(0.0, 3, 0)
+		inputs.set(0, 3, 0)
 
-func orientation(delta: float) -> void:
+func orientation() -> void:
 	key_direction = nd.sum(nd.multiply(directions, inputs), 0).to_vector3().normalized()
-	blend_position = velocity.length()
 	if key_direction.length() > 0.1:
 		var camera_yaw: float = camera.transform.basis.get_euler().y
 		target_angle = atan2(key_direction.x, -key_direction.z) + camera_yaw
@@ -95,15 +76,11 @@ func orientation(delta: float) -> void:
 		desired_rotation = Quaternion(Vector3.UP, target_angle)
 		force_vec = Vector3(sin(target_angle), 0.0, cos(target_angle))
 
-func turn_animation(delta: float) -> void:
+func turn_animation() -> void:
 	if !able_to_turn:
 		return
 		
-	if !turn_triggered:
-		return
-		
 	turn_direction = force_vec
-	turn_triggered = false
 	
 	
 	var angle: float = last_orientation.normalized().dot(turn_direction.normalized())
@@ -137,7 +114,7 @@ func reset_move_triggers():
 	animationTree.set("parameters/conditions/stop_run", false)
 	animationTree.set("parameters/conditions/run_turn_180", false)
 
-func rotation_correction(delta: float):
+func rotation_correction():
 	if !correct_rotation:
 		return
 	
@@ -146,9 +123,9 @@ func rotation_correction(delta: float):
 	var target_rot: Vector2 = Vector2(turn_direction.x, turn_direction.z)
 		
 	var current_angle: float = current_rot.angle()
-	var target_angle: float = target_rot.angle()
+	var desired_angle: float = target_rot.angle()
 	
-	var delta_angle: float = target_angle - current_angle
+	var delta_angle: float = desired_angle - current_angle
 	delta_angle = fmod(delta_angle + PI, 2.0 * PI) - PI
 	
 	var rot_quat: Quaternion = Quaternion(Vector3.UP, -delta_angle * 0.05)
@@ -157,13 +134,13 @@ func rotation_correction(delta: float):
 		should_turn = false
 
 func manage_turn(delta: float) -> void:
-	turn_animation(delta)
+	turn_animation()
 	var root_motion_pos = animationTree.get_root_motion_position()
 	var root_motion_quat = animationTree.get_root_motion_rotation()
-	var velocity = root_motion_quat * root_motion_pos / delta
+	velocity = root_motion_quat * root_motion_pos / delta
 	characterBody.set_velocity(velocity)
 	characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
-	rotation_correction(delta)
+	rotation_correction()
 
 func manage_movement(delta: float) -> void:
 	movement_animation()
@@ -173,7 +150,7 @@ func manage_movement(delta: float) -> void:
 	var char_orientation: Vector3 = characterBody.transform.basis.z
 	var char_orientation_norm: Vector3 = char_orientation.normalized()
 	var move_amount: float = root_motion_pos.length()
-	var velocity = (char_orientation_norm * move_amount) / delta
+	velocity = (char_orientation_norm * move_amount) / delta
 	
 	characterBody.set_velocity(velocity)
 	if !dont_rotate_while_stopping:
@@ -185,7 +162,6 @@ func manage_movement(delta: float) -> void:
 
 func _ready() -> void:
 	animationTree.active = true
-	animationTree.set("parameters/conditions/idle", true)
 
 func _process(delta: float) -> void:
 	reset_move_triggers()
@@ -206,13 +182,11 @@ func _process(delta: float) -> void:
 		hold_time += delta
 	# general
 	process_input()
-	orientation(delta)
+	orientation()
 	# if key slightly pressed
 	if any_key_released and !should_turn:
-		print("Tapped: ", hold_time)
 		if hold_time > TAP_THRESHOLD and hold_time <= PRESS_THRESHOLD and !should_move:
 			should_turn = true
-			turn_triggered = true
 		
 		hold_time = 0.0
 	elif any_key_pressed:
@@ -229,18 +203,19 @@ func _process(delta: float) -> void:
 
 
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
-	if anim_name in anim_exceptions or anim_name in turn_animations:
+	if anim_name in anim_exceptions or anim_name == IDLE:
 		dont_rotate_while_stopping = false
-	if anim_name == "Action Idle to Standing Idle/action_idle_to_standing_idle":
+	if anim_name == ACTION_STANDING_TO_IDLE_STANDING:
 		should_move = false
 	correct_rotation = true
 	able_to_turn = true
 
 
 func _on_animation_tree_animation_started(anim_name: StringName) -> void:
-	if anim_name == "Idle/idle":
+	if anim_name == IDLE:
+		dont_rotate_while_stopping = true
 		return
-	if anim_name in anim_exceptions or anim_name in turn_animations:
+	if anim_name in anim_exceptions:
 		dont_rotate_while_stopping = true
 	correct_rotation = false
 	able_to_turn = false
