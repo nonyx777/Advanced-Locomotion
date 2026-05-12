@@ -58,7 +58,7 @@ var right_released: bool
 var any_key_released: bool
 
 const TAP_THRESHOLD: float = 0.01
-const PRESS_THRESHOLD: float = 0.3
+const PRESS_THRESHOLD: float = 0.1
 var hold_time: float = 0.0
 var should_turn: bool = false
 var should_move: bool = false
