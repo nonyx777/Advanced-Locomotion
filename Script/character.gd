@@ -45,9 +45,10 @@ var should_move: bool = false
 
 var anim_exceptions = Array(["Run To Stop/run_to_stop", "Run Turn 180/run_turn_180", 
 "Action Idle to Standing Idle/action_idle_to_standing_idle", "Left Turn 90/left_turn_90 2", 
-"Right Turn 180/right_turn_180", "Right Turn 90/right_turn_90"])
+"Right Turn 180/right_turn_180", "Right Turn 90/right_turn_90", "Idle/idle"])
 const ACTION_STANDING_TO_IDLE_STANDING: String = "Action Idle to Standing Idle/action_idle_to_standing_idle"
-const IDLE: String = "Idle/idle"
+
+var skip_for_the_first_time: int = 1
 
 func process_input() -> void:
 	if forward:
@@ -203,7 +204,7 @@ func _process(delta: float) -> void:
 
 
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
-	if anim_name in anim_exceptions or anim_name == IDLE:
+	if anim_name in anim_exceptions:
 		dont_rotate_while_stopping = false
 	if anim_name == ACTION_STANDING_TO_IDLE_STANDING:
 		should_move = false
@@ -212,9 +213,10 @@ func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
 
 
 func _on_animation_tree_animation_started(anim_name: StringName) -> void:
-	if anim_name == IDLE:
-		dont_rotate_while_stopping = true
+	if skip_for_the_first_time == 1:
+		skip_for_the_first_time = 0
 		return
+	
 	if anim_name in anim_exceptions:
 		dont_rotate_while_stopping = true
 	correct_rotation = false
