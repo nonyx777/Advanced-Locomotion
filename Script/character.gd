@@ -23,6 +23,7 @@ var dont_rotate_while_stopping: bool = false
 
 # Animation Parameters
 @export var animationTree: AnimationTree
+var state_machine
 var last_orientation: Vector3
 
 # keys
@@ -160,9 +161,14 @@ func manage_movement(delta: float) -> void:
 		characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
 		desired_rotation = characterBody.get_quaternion() * root_motion_quat
 	characterBody.move_and_slide()
+	
+	var current_state = state_machine.get_current_node()
+	if current_state == "Idle_idle":
+		should_move = false
 
 func _ready() -> void:
 	animationTree.active = true
+	state_machine = animationTree.get("parameters/playback")
 
 func _process(delta: float) -> void:
 	reset_move_triggers()
@@ -191,7 +197,7 @@ func _process(delta: float) -> void:
 		
 		hold_time = 0.0
 	elif any_key_pressed:
-		if hold_time > PRESS_THRESHOLD:
+		if hold_time > PRESS_THRESHOLD and !should_turn:
 			should_move = true
 			
 	
@@ -206,8 +212,7 @@ func _process(delta: float) -> void:
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
 	if anim_name in anim_exceptions:
 		dont_rotate_while_stopping = false
-	if anim_name == ACTION_STANDING_TO_IDLE_STANDING:
-		should_move = false
+		
 	correct_rotation = true
 	able_to_turn = true
 
