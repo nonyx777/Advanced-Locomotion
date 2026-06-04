@@ -148,8 +148,9 @@ func manage_turn(delta: float) -> void:
 func manage_movement(delta: float) -> void:
 	movement_animation()
 	
+	var not_pressing: bool = hold_time < PRESS_THRESHOLD
 	var current_state = state_machine.get_current_node()
-	if current_state == "Idle_idle":
+	if current_state == "Idle_idle" and not_pressing: # will remove this once I get start run turn 180 anim
 		should_move = false
 		
 	var root_motion_pos = animationTree.get_root_motion_position()
@@ -202,7 +203,7 @@ func _process(delta: float) -> void:
 	elif any_key_pressed:
 		if hold_time > PRESS_THRESHOLD and !should_turn:
 			should_move = true
-			
+	
 	
 	if should_turn:
 		manage_turn(delta)
