@@ -48,6 +48,7 @@ var anim_exceptions = Array(["Run To Stop/run_to_stop", "Run Turn 180/run_turn_1
 "Action Idle to Standing Idle/action_idle_to_standing_idle", "Left Turn 90/left_turn_90 2", 
 "Right Turn 180/right_turn_180", "Right Turn 90/right_turn_90", "Idle/idle"])
 const ACTION_STANDING_TO_IDLE_STANDING: String = "Action Idle to Standing Idle/action_idle_to_standing_idle"
+const IDLE: String = "Idle/idle"
 
 var skip_for_the_first_time: int = 1
 
@@ -146,6 +147,11 @@ func manage_turn(delta: float) -> void:
 
 func manage_movement(delta: float) -> void:
 	movement_animation()
+	
+	var current_state = state_machine.get_current_node()
+	if current_state == "Idle_idle":
+		should_move = false
+		
 	var root_motion_pos = animationTree.get_root_motion_position()
 	var root_motion_quat = animationTree.get_root_motion_rotation()
 	
@@ -155,16 +161,13 @@ func manage_movement(delta: float) -> void:
 	velocity = (char_orientation_norm * move_amount) / delta
 	
 	characterBody.set_velocity(velocity)
-	if !dont_rotate_while_stopping:
+	if !dont_rotate_while_stopping and should_move:
 		characterBody.transform.basis = Basis(characterBody.transform.basis.get_rotation_quaternion().slerp(desired_rotation, snappiness * delta))
 	else:
-		characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
-		desired_rotation = characterBody.get_quaternion() * root_motion_quat
+		var quat: Quaternion = characterBody.get_quaternion() * root_motion_quat
+		characterBody.set_quaternion(quat)
+		desired_rotation = quat
 	characterBody.move_and_slide()
-	
-	var current_state = state_machine.get_current_node()
-	if current_state == "Idle_idle":
-		should_move = false
 
 func _ready() -> void:
 	animationTree.active = true
@@ -221,6 +224,9 @@ func _on_animation_tree_animation_started(anim_name: StringName) -> void:
 	if skip_for_the_first_time == 1:
 		skip_for_the_first_time = 0
 		return
+	
+	if anim_name == IDLE:
+		should_move = false
 	
 	if anim_name in anim_exceptions:
 		dont_rotate_while_stopping = true
