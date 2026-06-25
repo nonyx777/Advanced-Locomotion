@@ -52,6 +52,8 @@ const IDLE: String = "Idle/idle"
 
 var skip_for_the_first_time: int = 1
 
+var rotating_while_running: bool = false
+
 func process_input() -> void:
 	if forward:
 		inputs.set(1, 0, 0)
@@ -103,6 +105,7 @@ func movement_animation() -> void:
 	
 	var angle: float = last_orientation.normalized().dot(force_vec.normalized())
 	if angle <= -0.8:
+		rotating_while_running = true
 		animationTree.set("parameters/conditions/run_turn_180", true)
 	else:
 		animationTree.set("parameters/conditions/start_run", true)
@@ -162,12 +165,16 @@ func manage_movement(delta: float) -> void:
 	velocity = (char_orientation_norm * move_amount) / delta
 	
 	characterBody.set_velocity(velocity)
-	if !dont_rotate_while_stopping and should_move:
-		characterBody.transform.basis = Basis(characterBody.transform.basis.get_rotation_quaternion().slerp(desired_rotation, snappiness * delta))
+	
+	if !dont_rotate_while_stopping and should_move and !rotating_while_running:
+		characterBody.transform.basis = Basis(
+			characterBody.transform.basis
+			.get_rotation_quaternion()
+			.slerp(desired_rotation, snappiness * delta)
+		)
 	else:
 		var quat: Quaternion = characterBody.get_quaternion() * root_motion_quat
 		characterBody.set_quaternion(quat)
-		desired_rotation = quat
 	characterBody.move_and_slide()
 
 func _ready() -> void:
@@ -177,6 +184,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	reset_move_triggers()
 	reset_turn_triggers()
+	rotating_while_running = false
 	
 	forward = Input.is_action_pressed("Forward")
 	backward = Input.is_action_pressed("Backward")
