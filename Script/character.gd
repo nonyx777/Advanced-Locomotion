@@ -54,6 +54,11 @@ var skip_for_the_first_time: int = 1
 
 var rotating_while_running: bool = false
 
+# Spine controller
+@onready var skeleton: Skeleton3D = %GeneralSkeleton
+var spine_id
+@export var lean_factor = 1.5
+
 func process_input() -> void:
 	if forward:
 		inputs.set(1, 0, 0)
@@ -79,7 +84,7 @@ func orientation() -> void:
 		target_angle = atan2(key_direction.x, -key_direction.z) + camera_yaw
 		# Smoothly rotate to target rotation
 		desired_rotation = Quaternion(Vector3.UP, target_angle)
-		force_vec = Vector3(sin(target_angle), 0.0, cos(target_angle))
+		force_vec = Vector3(sin(target_angle), 0.0, cos(target_angle)).normalized()
 
 func turn_animation() -> void:
 	if !able_to_turn:
@@ -178,8 +183,10 @@ func manage_movement(delta: float) -> void:
 	characterBody.move_and_slide()
 
 func _ready() -> void:
-	animationTree.active = true
+	animationTree.active = false	
 	state_machine = animationTree.get("parameters/playback")
+	
+	spine_id = skeleton.find_bone("Spine")
 
 func _process(delta: float) -> void:
 	reset_move_triggers()
@@ -219,6 +226,7 @@ func _process(delta: float) -> void:
 		manage_movement(delta)
 	
 	last_orientation = characterBody.transform.basis.z
+	spine(delta)
 
 
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
@@ -241,3 +249,34 @@ func _on_animation_tree_animation_started(anim_name: StringName) -> void:
 		dont_rotate_while_stopping = true
 	correct_rotation = false
 	able_to_turn = false
+
+# Spine Contorl Functions
+func spine(delta: float) -> void:
+	var rotation_angle := 0.0
+
+	var move_dir := force_vec.normalized()
+	var forward := last_orientation.normalized()
+
+	var angle := forward.dot(move_dir)
+
+	var rel_dir := force_vec.x * last_orientation.z - force_vec.z * last_orientation.x
+
+	if angle >= -0.4 and angle <= 0.4:
+		rotation_angle = 30.0 if rel_dir > 0 else -30.0
+
+	var rest_trans := skeleton.get_bone_rest(spine_id)
+
+	# Use bone LOCAL right axis
+	var rotation_axis := -rest_trans.basis.z.normalized()
+
+	var target := rest_trans.rotated(
+		rotation_axis,
+		deg_to_rad(rotation_angle)
+	)
+
+	var current := skeleton.get_bone_pose(spine_id)
+
+	skeleton.set_bone_pose(
+		spine_id,
+		current.interpolate_with(target, delta * lean_factor)
+	)
