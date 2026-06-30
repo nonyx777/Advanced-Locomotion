@@ -57,6 +57,7 @@ var rotating_while_running: bool = false
 # Spine controller
 @onready var skeleton: Skeleton3D = %GeneralSkeleton
 var spine_id
+var chest_id
 @export var lean_factor = 1.5
 
 func process_input() -> void:
@@ -183,10 +184,11 @@ func manage_movement(delta: float) -> void:
 	characterBody.move_and_slide()
 
 func _ready() -> void:
-	animationTree.active = false	
+	animationTree.active = false
 	state_machine = animationTree.get("parameters/playback")
 	
 	spine_id = skeleton.find_bone("Spine")
+	chest_id = skeleton.find_bone("Chest")
 
 func _process(delta: float) -> void:
 	reset_move_triggers()
@@ -226,7 +228,7 @@ func _process(delta: float) -> void:
 		manage_movement(delta)
 	
 	last_orientation = characterBody.transform.basis.z
-	spine(delta)
+	call_deferred("spine", delta)
 
 
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
@@ -252,31 +254,45 @@ func _on_animation_tree_animation_started(anim_name: StringName) -> void:
 
 # Spine Contorl Functions
 func spine(delta: float) -> void:
+	if force_vec.length() < 0.01:
+		return 
+
 	var rotation_angle := 0.0
 
 	var move_dir := force_vec.normalized()
 	var forward := last_orientation.normalized()
 
 	var angle := forward.dot(move_dir)
-
-	var rel_dir := force_vec.x * last_orientation.z - force_vec.z * last_orientation.x
+	var rel_dir := forward.cross(move_dir).y
 
 	if angle >= -0.4 and angle <= 0.4:
-		rotation_angle = 30.0 if rel_dir > 0 else -30.0
+		rotation_angle = -30.0 if rel_dir > 0 else 30.0
 
-	var rest_trans := skeleton.get_bone_rest(spine_id)
-
-	# Use bone LOCAL right axis
-	var rotation_axis := -rest_trans.basis.z.normalized()
-
-	var target := rest_trans.rotated(
-		rotation_axis,
+	var rot := Quaternion(
+		Vector3.BACK,
 		deg_to_rad(rotation_angle)
 	)
 
-	var current := skeleton.get_bone_pose(spine_id)
+	apply_rotation_recursive(spine_id, rot)
+
+func apply_rotation_recursive(
+	bone: int,
+	rotation: Quaternion
+) -> void:
+	var animated_pose := skeleton.get_bone_pose(bone)
+
+	var target := animated_pose
+	target.basis = Basis(rotation) * target.basis
+
+	var final_pose := animated_pose.interpolate_with(
+		target,
+		get_physics_process_delta_time() * lean_factor
+	)
 
 	skeleton.set_bone_pose(
-		spine_id,
-		current.interpolate_with(target, delta * lean_factor)
+		bone,
+		final_pose
 	)
+
+	for child in skeleton.get_bone_children(bone):
+		apply_rotation_recursive(child, rotation)
