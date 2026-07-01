@@ -183,8 +183,8 @@ func manage_movement(delta: float) -> void:
 		characterBody.set_quaternion(quat)
 	characterBody.move_and_slide()
 
-func _ready() -> void:
-	animationTree.active = false
+func _ready() -> void: 
+	animationTree.active = true
 	state_machine = animationTree.get("parameters/playback")
 	
 	spine_id = skeleton.find_bone("Spine")
@@ -228,7 +228,7 @@ func _process(delta: float) -> void:
 		manage_movement(delta)
 	
 	last_orientation = characterBody.transform.basis.z
-	call_deferred("spine", delta)
+	#call_deferred("spine", delta)
 
 
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
