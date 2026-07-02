@@ -1,4 +1,5 @@
 extends Node3D
+class_name Character
 @onready var characterBody: CharacterBody3D = $CharacterBody3D
 @onready var camera: Camera3D = $"../Camera3D"
 
@@ -9,7 +10,7 @@ var key_direction: Vector3
 
 # Linear Movement
 var velocity: Vector3
-var force_vec: Vector3
+static var force_vec: Vector3
 var snappiness: float = 5.0
 var target_angle: float
 var desired_rotation: Quaternion
@@ -24,7 +25,7 @@ var dont_rotate_while_stopping: bool = false
 # Animation Parameters
 @export var animationTree: AnimationTree
 var state_machine
-var last_orientation: Vector3
+static var last_orientation: Vector3
 
 # keys
 var forward: bool
@@ -53,12 +54,6 @@ const IDLE: String = "Idle/idle"
 var skip_for_the_first_time: int = 1
 
 var rotating_while_running: bool = false
-
-# Spine controller
-@onready var skeleton: Skeleton3D = %GeneralSkeleton
-var spine_id
-var chest_id
-@export var lean_factor = 1.5
 
 func process_input() -> void:
 	if forward:
@@ -186,9 +181,6 @@ func manage_movement(delta: float) -> void:
 func _ready() -> void: 
 	animationTree.active = true
 	state_machine = animationTree.get("parameters/playback")
-	
-	spine_id = skeleton.find_bone("Spine")
-	chest_id = skeleton.find_bone("Chest")
 
 func _process(delta: float) -> void:
 	reset_move_triggers()
@@ -251,48 +243,3 @@ func _on_animation_tree_animation_started(anim_name: StringName) -> void:
 		dont_rotate_while_stopping = true
 	correct_rotation = false
 	able_to_turn = false
-
-# Spine Contorl Functions
-func spine(delta: float) -> void:
-	if force_vec.length() < 0.01:
-		return 
-
-	var rotation_angle := 0.0
-
-	var move_dir := force_vec.normalized()
-	var forward := last_orientation.normalized()
-
-	var angle := forward.dot(move_dir)
-	var rel_dir := forward.cross(move_dir).y
-
-	if angle >= -0.4 and angle <= 0.4:
-		rotation_angle = -30.0 if rel_dir > 0 else 30.0
-
-	var rot := Quaternion(
-		Vector3.BACK,
-		deg_to_rad(rotation_angle)
-	)
-
-	apply_rotation_recursive(spine_id, rot)
-
-func apply_rotation_recursive(
-	bone: int,
-	rotation: Quaternion
-) -> void:
-	var animated_pose := skeleton.get_bone_pose(bone)
-
-	var target := animated_pose
-	target.basis = Basis(rotation) * target.basis
-
-	var final_pose := animated_pose.interpolate_with(
-		target,
-		get_physics_process_delta_time() * lean_factor
-	)
-
-	skeleton.set_bone_pose(
-		bone,
-		final_pose
-	)
-
-	for child in skeleton.get_bone_children(bone):
-		apply_rotation_recursive(child, rotation)

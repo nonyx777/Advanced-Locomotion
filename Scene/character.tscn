@@ -1020,7 +1020,6 @@ visibility_parent = NodePath("")
 active = true
 influence = 1.0
 script = ExtResource("12_uk2ye")
-bone = "Spine"
 metadata/_custom_type_script = "uid://denm8umrl47km"
 
 [node name="Ch32" type="MeshInstance3D" parent="CharacterBody3D/Base/Armature/GeneralSkeleton"]
