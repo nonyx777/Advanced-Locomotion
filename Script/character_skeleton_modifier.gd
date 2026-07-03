@@ -3,7 +3,7 @@ extends SkeletonModifier3D
 
 @export var bone: String = "Spine"
 var lean_factor: float = 5.0
-var lean_angle: float = 20.0
+var lean_angle: float = 25.0
 var current_angle: float = 0.0
 
 func _process_modification() -> void:
