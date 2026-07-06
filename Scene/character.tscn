@@ -105,7 +105,7 @@ advance_mode = 2
 advance_condition = &"start_run"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_kfm7y"]
-xfade_time = 0.1
+xfade_time = 0.5
 switch_mode = 2
 advance_mode = 2
 
@@ -161,7 +161,7 @@ states/Running_running/node = SubResource("AnimationNodeAnimation_jrvi5")
 states/Running_running/position = Vector2(197, 584.063)
 states/Start/position = Vector2(197, 115)
 transitions = ["Idle_idle", "Right Turn 180_right_turn_180", SubResource("AnimationNodeStateMachineTransition_bosnt"), "Right Turn 180_right_turn_180", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_b1jne"), "Idle_idle", "Right Turn 90_right_turn_90", SubResource("AnimationNodeStateMachineTransition_oncsw"), "Right Turn 90_right_turn_90", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_cp0d1"), "Left Turn 90_left_turn_90 2", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_uk2ye"), "Idle_idle", "Left Turn 90_left_turn_90 2", SubResource("AnimationNodeStateMachineTransition_v2g5y"), "Start", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_1cgd8"), "Idle to Sprint_idle_to_sprint", "Running_running", SubResource("AnimationNodeStateMachineTransition_6udgl"), "Running_running", "Run To Stop_run_to_stop", SubResource("AnimationNodeStateMachineTransition_minn2"), "Idle_idle", "Idle to Sprint_idle_to_sprint", SubResource("AnimationNodeStateMachineTransition_jrvi5"), "Run To Stop_run_to_stop", "Action Idle to Standing Idle_action_idle_to_standing_idle", SubResource("AnimationNodeStateMachineTransition_kfm7y"), "Action Idle to Standing Idle_action_idle_to_standing_idle", "Idle_idle", SubResource("AnimationNodeStateMachineTransition_73ll3"), "Action Idle to Standing Idle_action_idle_to_standing_idle", "Idle to Sprint_idle_to_sprint", SubResource("AnimationNodeStateMachineTransition_ljc6b"), "Running_running", "Run Turn 180_run_turn_180", SubResource("AnimationNodeStateMachineTransition_ilft0"), "Run Turn 180_run_turn_180", "Run To Stop_run_to_stop", SubResource("AnimationNodeStateMachineTransition_087ws"), "Run Turn 180_run_turn_180", "Idle to Sprint_idle_to_sprint", SubResource("AnimationNodeStateMachineTransition_inwfv"), "Idle to Sprint_idle_to_sprint", "Run To Stop_run_to_stop", SubResource("AnimationNodeStateMachineTransition_cmtgg")]
-graph_offset = Vector2(-350.026, 442.416)
+graph_offset = Vector2(-572.026, 298.416)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pa3bh"]
 resource_name = "Ch32_body"

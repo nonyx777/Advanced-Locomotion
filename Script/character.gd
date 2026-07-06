@@ -152,10 +152,10 @@ func manage_turn(delta: float) -> void:
 func manage_movement(delta: float) -> void:
 	movement_animation()
 	
+	# will remove this once I get start run turn 180 anim
 	var not_pressing: bool = hold_time < PRESS_THRESHOLD
 	var current_state = state_machine.get_current_node()
-	if current_state == "Idle_idle" and not_pressing: # will remove this once I get start run turn 180 anim
-		should_move = false
+	var temp_condition: bool = current_state == "Idle_idle" and not_pressing 
 		
 	var root_motion_pos = animationTree.get_root_motion_position()
 	var root_motion_quat = animationTree.get_root_motion_rotation()
@@ -167,7 +167,7 @@ func manage_movement(delta: float) -> void:
 	
 	characterBody.set_velocity(velocity)
 	
-	if !dont_rotate_while_stopping and should_move and !rotating_while_running:
+	if !temp_condition and !dont_rotate_while_stopping and !rotating_while_running:
 		characterBody.transform.basis = Basis(
 			characterBody.transform.basis
 			.get_rotation_quaternion()
@@ -181,6 +181,9 @@ func manage_movement(delta: float) -> void:
 func _ready() -> void: 
 	animationTree.active = true
 	state_machine = animationTree.get("parameters/playback")
+	
+	# To avoid leaning initially
+	force_vec = characterBody.transform.basis.z
 
 func _process(delta: float) -> void:
 	reset_move_triggers()
@@ -220,7 +223,6 @@ func _process(delta: float) -> void:
 		manage_movement(delta)
 	
 	last_orientation = characterBody.transform.basis.z
-	#call_deferred("spine", delta)
 
 
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
