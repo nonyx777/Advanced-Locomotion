@@ -155,6 +155,9 @@ func movement_status() -> void:
 	var has_stopped_moving: bool = current_state == "Idle_idle" and not_pressing
 	
 	should_move = !has_stopped_moving
+	# Shouldn't keep leaning when idle
+	var decide_lean: int = int(has_stopped_moving)
+	force_vec = last_orientation * decide_lean + force_vec * (1 - decide_lean)
 
 func manage_movement(delta: float) -> void:
 	movement_animation()
