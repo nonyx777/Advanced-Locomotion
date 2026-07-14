@@ -149,13 +149,20 @@ func manage_turn(delta: float) -> void:
 	characterBody.set_quaternion(characterBody.get_quaternion() * root_motion_quat)
 	rotation_correction()
 
+func movement_status() -> void:
+	var not_pressing: bool = hold_time < PRESS_THRESHOLD
+	var current_state = state_machine.get_current_node()
+	var has_stopped_moving: bool = current_state == "Idle_idle" and not_pressing
+	
+	should_move = !has_stopped_moving
+
 func manage_movement(delta: float) -> void:
 	movement_animation()
 	
 	# will remove this once I get start run turn 180 anim
 	var not_pressing: bool = hold_time < PRESS_THRESHOLD
 	var current_state = state_machine.get_current_node()
-	var temp_condition: bool = current_state == "Idle_idle" and not_pressing 
+	var temp_condition: bool = current_state == "Idle_idle" and not_pressing
 		
 	var root_motion_pos = animationTree.get_root_motion_position()
 	var root_motion_quat = animationTree.get_root_motion_rotation()
@@ -177,6 +184,8 @@ func manage_movement(delta: float) -> void:
 		var quat: Quaternion = characterBody.get_quaternion() * root_motion_quat
 		characterBody.set_quaternion(quat)
 	characterBody.move_and_slide()
+	
+	movement_status()
 
 func _ready() -> void: 
 	animationTree.active = true
@@ -210,6 +219,7 @@ func _process(delta: float) -> void:
 	if any_key_released and !should_turn:
 		if hold_time > TAP_THRESHOLD and hold_time <= PRESS_THRESHOLD and !should_move:
 			should_turn = true
+			print("Hold time: ", hold_time, "- Tap THRESHOLD: ", TAP_THRESHOLD)
 		
 		hold_time = 0.0
 	elif any_key_pressed:
