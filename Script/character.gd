@@ -40,10 +40,10 @@ var right_released: bool
 var any_key_released: bool
 
 const TAP_THRESHOLD: float = 0.01
-const PRESS_THRESHOLD: float = 0.1
+const PRESS_THRESHOLD: float = 0.2
 var hold_time: float = 0.0
 var should_turn: bool = false
-var should_move: bool = false
+static var should_move: bool = false
 
 var anim_exceptions = Array(["Run To Stop/run_to_stop", "Run Turn 180/run_turn_180", 
 "Action Idle to Standing Idle/action_idle_to_standing_idle", "Left Turn 90/left_turn_90 2", 

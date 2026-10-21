@@ -18,7 +18,7 @@ func _process_modification() -> void:
 	var angle: float = forward_dir.dot(move_dir)
 	var rel_dir: float = move_dir[0] * forward_dir[2] - move_dir[2] * forward_dir[0]
 
-	if angle >= -0.4 and angle <= 0.4:
+	if angle >= -0.4 and angle <= 0.4 and Character.should_move:
 		target_angle = -lean_angle if rel_dir > 0 else lean_angle
 	
 	current_angle = lerpf(current_angle, target_angle, lean_factor * dt)
