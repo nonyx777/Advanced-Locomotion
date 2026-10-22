@@ -47,13 +47,14 @@ static var should_move: bool = false
 
 var anim_exceptions = Array(["Run To Stop/run_to_stop", "Run Turn 180/run_turn_180", 
 "Action Idle to Standing Idle/action_idle_to_standing_idle", "Left Turn 90/left_turn_90 2", 
-"Right Turn 180/right_turn_180", "Right Turn 90/right_turn_90", "Idle/idle", "Turn and Run/turn_and_run"])
+"Right Turn 180/right_turn_180", "Right Turn 90/right_turn_90", "Idle/idle", "Turn And Run/turn_and_run"])
 const ACTION_STANDING_TO_IDLE_STANDING: String = "Action Idle to Standing Idle/action_idle_to_standing_idle"
 const IDLE: String = "Idle/idle"
 
 var skip_for_the_first_time: int = 1
 
 var rotating_while_running: bool = false
+var disable_rotation_correction: bool = false
 
 func process_input() -> void:
 	if forward:
@@ -92,8 +93,10 @@ func turn_animation() -> void:
 	var angle: float = last_orientation.normalized().dot(turn_direction.normalized())
 	var rel_dir: float = turn_direction[0] * last_orientation[2] - turn_direction[2] * last_orientation[0]
 	if angle <= -0.8:
+		disable_rotation_correction = true
 		animationTree.set("parameters/conditions/right_turn_180", true)
 	if angle <= 0.4 and angle >= -0.4:
+		disable_rotation_correction = true
 		if rel_dir >= 0:
 			animationTree.set("parameters/conditions/left_turn_90", true)
 		elif rel_dir < 0:
@@ -126,7 +129,7 @@ func reset_move_triggers():
 	animationTree.set("parameters/conditions/turn_and_run", false)
 
 func rotation_correction():
-	if !correct_rotation:
+	if !correct_rotation or disable_rotation_correction:
 		return
 	
 	var current_fwd: Vector3 = characterBody.transform.basis.z
@@ -245,6 +248,7 @@ func _process(delta: float) -> void:
 func _on_animation_tree_animation_finished(anim_name: StringName) -> void:
 	if anim_name in anim_exceptions:
 		dont_rotate_while_stopping = false
+		disable_rotation_correction = false
 		
 	correct_rotation = true
 	able_to_turn = true
