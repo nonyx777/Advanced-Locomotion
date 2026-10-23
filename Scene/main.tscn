@@ -1,10 +1,33 @@
-[gd_scene load_steps=2 format=3 uid="uid://cdj6i5awiqa6u"]
+[gd_scene load_steps=6 format=3 uid="uid://cdj6i5awiqa6u"]
 
 [ext_resource type="PackedScene" uid="uid://g25ws7lotasa" path="res://Scene/character.tscn" id="1_na7fv"]
+[ext_resource type="PackedScene" uid="uid://be2gdx4lqvaey" path="res://Assets/Whitebox-Env.glb" id="2_sblpm"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_f6udf"]
+sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+ground_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
+
+[sub_resource type="Sky" id="Sky_sblpm"]
+sky_material = SubResource("ProceduralSkyMaterial_f6udf")
+
+[sub_resource type="Environment" id="Environment_r34rm"]
+background_mode = 2
+sky = SubResource("Sky_sblpm")
+tonemap_mode = 2
+glow_enabled = true
 
 [node name="Main" type="Node3D"]
 
-[node name="Character" parent="." instance=ExtResource("1_na7fv")]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_r34rm")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(0.999936, -0.00642869, 0.00930228, 0, 0.822662, 0.568531, -0.0113075, -0.568495, 0.822609, 0.0372091, 2.27413, 3.29044)
+transform = Transform3D(0.989016, 0.0326211, -0.144165, 0, 0.975342, 0.220697, 0.147809, -0.218273, 0.964629, -0.585685, 1.80481, 3.8258)
+
+[node name="Character" parent="." instance=ExtResource("1_na7fv")]
+
+[node name="Whitebox-Env" parent="." instance=ExtResource("2_sblpm")]

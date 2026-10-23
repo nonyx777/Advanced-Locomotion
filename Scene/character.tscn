@@ -1,4 +1,4 @@
-[gd_scene load_steps=54 format=4 uid="uid://g25ws7lotasa"]
+[gd_scene load_steps=50 format=4 uid="uid://g25ws7lotasa"]
 
 [ext_resource type="Script" uid="uid://ba4ff8gpkyn01" path="res://Script/character.gd" id="1_4lu42"]
 [ext_resource type="AnimationLibrary" uid="uid://bhe6hx6yagfy8" path="res://Animations/Run/Action Idle to Standing Idle.res" id="3_cp0d1"]
@@ -13,19 +13,6 @@
 [ext_resource type="AnimationLibrary" uid="uid://cdttjeacq36yg" path="res://Animations/Run/Run Turn 180.res" id="10_uk2ye"]
 [ext_resource type="AnimationLibrary" uid="uid://b8k50n232s156" path="res://Animations/Turn/Turn And Run.res" id="11_v2g5y"]
 [ext_resource type="Script" uid="uid://denm8umrl47km" path="res://Script/character_skeleton_modifier.gd" id="12_uk2ye"]
-
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_cpq5r"]
-sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
-ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
-
-[sub_resource type="Sky" id="Sky_b5pnh"]
-sky_material = SubResource("ProceduralSkyMaterial_cpq5r")
-
-[sub_resource type="Environment" id="Environment_gt81d"]
-background_mode = 2
-sky = SubResource("Sky_b5pnh")
-tonemap_mode = 2
-glow_enabled = true
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_qtrob"]
 radius = 0.367349
@@ -414,19 +401,9 @@ bind/65/name = &"mixamorig8_RightToe_End"
 bind/65/bone = -1
 bind/65/pose = Transform3D(-0.986155, -0.113064, -0.121214, -0.126134, 0.0375907, 0.991291, -0.107524, 0.992876, -0.0513336, -0.139439, -0.200804, -0.0251036)
 
-[sub_resource type="QuadMesh" id="QuadMesh_c5erk"]
-size = Vector2(10, 10)
-
 [node name="Character" type="Node3D" node_paths=PackedStringArray("animationTree")]
 script = ExtResource("1_4lu42")
 animationTree = NodePath("CharacterBody3D/Base/AnimationTree")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
-shadow_enabled = true
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_gt81d")
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="."]
 
@@ -1049,10 +1026,6 @@ metadata/_custom_type_script = "uid://denm8umrl47km"
 [node name="Ch32" type="MeshInstance3D" parent="CharacterBody3D/Base/Armature/GeneralSkeleton"]
 mesh = SubResource("ArrayMesh_imacy")
 skin = SubResource("Skin_cpf06")
-
-[node name="Floor" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
-mesh = SubResource("QuadMesh_c5erk")
 
 [connection signal="animation_finished" from="CharacterBody3D/Base/AnimationTree" to="." method="_on_animation_tree_animation_finished"]
 [connection signal="animation_started" from="CharacterBody3D/Base/AnimationTree" to="." method="_on_animation_tree_animation_started"]
