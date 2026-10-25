@@ -84,7 +84,7 @@ func orientation() -> void:
 		force_vec = Vector3(sin(target_angle), 0.0, cos(target_angle)).normalized()
 
 func turn_animation() -> void:
-	if !able_to_turn or disable_rotation_correction:
+	if !able_to_turn:
 		return
 	
 	turn_direction = force_vec
@@ -223,6 +223,8 @@ func _process(delta: float) -> void:
 		if hold_time > TAP_THRESHOLD and hold_time <= PRESS_THRESHOLD and !should_move:
 			should_turn = true
 			print("Hold time: ", hold_time, "- Tap THRESHOLD: ", TAP_THRESHOLD)
+			print("Should turn: ", should_turn)
+			print("Should move: ", should_move)
 		
 		hold_time = 0.0
 	elif any_key_pressed:
